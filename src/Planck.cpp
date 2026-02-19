@@ -1,6 +1,7 @@
 #include "Planck.hpp"
 #include <cmath>
 #include <stdexcept>
+#include <string>
 #include <limits>
 
 namespace disortpp {

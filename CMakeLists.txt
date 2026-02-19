@@ -17,6 +17,7 @@ endif()
 
 # Compiler flags
 if(MSVC)
+    add_compile_definitions(_USE_MATH_DEFINES)
     set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG /DEIGEN_NO_DEBUG")
 else()
     set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wextra -pedantic")

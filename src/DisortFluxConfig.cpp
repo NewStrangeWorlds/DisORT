@@ -1,6 +1,7 @@
 #include "DisortFluxConfig.hpp"
 #include "PhaseFunction.hpp"
 #include <stdexcept>
+#include <string>
 #include <cmath>
 
 namespace disortpp {

@@ -1,6 +1,7 @@
 #include "DisortConfig.hpp"
 #include "PhaseFunction.hpp"
 #include <stdexcept>
+#include <string>
 #include <algorithm>
 #include <cmath>
 

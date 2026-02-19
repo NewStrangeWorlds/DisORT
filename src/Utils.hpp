@@ -116,8 +116,8 @@ inline int fcmp(double x1, double x2) {
 inline double ratio(double a, double b) {
   constexpr double tiny = std::numeric_limits<double>::min();
   constexpr double huge = std::numeric_limits<double>::max();
-  constexpr double powmax = std::log10(huge);
-  constexpr double powmin = std::log10(tiny);
+  const double powmax = std::log10(huge);
+  const double powmin = std::log10(tiny);
 
   if (fcmp(b, 0.0) == 0) {
     return 1.0 + a;
