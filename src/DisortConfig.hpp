@@ -139,22 +139,22 @@ public:
   double bottom_radius = 0.0;  ///< Planet bottom_radius (same units as level_altitudes, used if use_spherical_beam=true)
 
   // Layer properties (0-based indexing)
-  std::vector<double> delta_tau;    ///< Optical depth of each layer [num_layers]
-  std::vector<double> single_scat_albedo;    ///< Single-scatter surface_albedo of each layer [num_layers]
+  std::vector<double> delta_tau;  ///< Optical depth of each layer [num_layers]
+  std::vector<double> single_scat_albedo;  ///< Single-scatter surface_albedo of each layer [num_layers]
   std::vector<std::vector<double>> phase_function_moments;  ///< Phase function moments [num_layers][nmomNstr()+1]
   
   //Level properties
-  std::vector<double> temperature;     ///< Temperature at levels [num_layers+1] (if use_thermal_emission=true)
-  std::vector<double> level_altitudes; ///< Altitude at levels [num_layers+1], Spherical geometry (if use_spherical_beam=true)
+  std::vector<double> temperature;  ///< Temperature at levels [num_layers+1] (if use_thermal_emission=true)
+  std::vector<double> level_altitudes;  ///< Altitude at levels [num_layers+1], Spherical geometry (if use_spherical_beam=true)
 
   // User output specification
-  std::vector<double> tau_user;     ///< User optical depths [num_user_tau]
-  std::vector<double> mu_user;      ///< User polar angle cosines [num_user_mu]
-  std::vector<double> phi_user;      ///< User azimuthal angles [deg] [num_phi]
+  std::vector<double> tau_user;  ///< User optical depths [num_user_tau]
+  std::vector<double> mu_user;  ///< User polar angle cosines [num_user_mu]
+  std::vector<double> phi_user;  ///< User azimuthal angles [deg] [num_phi]
 
   // Phase function specification (if using new intensity correction)
-  std::vector<double> mu_phase_function; ///< Scattering angle values [num_phase_func_angles]
-  std::vector<std::vector<double>> phase_function;    ///< Phase function values [num_layers][num_phase_func_angles]
+  std::vector<double> mu_phase_function;  ///< Scattering angle values [num_phase_func_angles]
+  std::vector<std::vector<double>> phase_function;  ///< Phase function values [num_layers][num_phase_func_angles]
 
   /**
    * @brief Default constructor

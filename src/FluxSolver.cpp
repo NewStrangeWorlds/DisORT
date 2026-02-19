@@ -1239,7 +1239,11 @@ static double chapmanImpl(int lc, double tau_frac,
 // ============================================================================
 
 template class DisortFluxSolver<4>;
+template class DisortFluxSolver<6>;
 template class DisortFluxSolver<8>;
+template class DisortFluxSolver<10>;
+template class DisortFluxSolver<12>;
+template class DisortFluxSolver<14>;
 template class DisortFluxSolver<16>;
 template class DisortFluxSolver<32>;
 template class DisortFluxSolver<64>;

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(disortpp VERSION 2.1.3 LANGUAGES CXX)
 
+# Options
+option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" OFF)
+
 # C++17 Standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -29,6 +32,17 @@ set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(eigen)
 
+# Dependencies: pybind11 via FetchContent (optional, for Python bindings)
+if(BUILD_PYTHON_BINDINGS)
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.13.6
+        GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(pybind11)
+endif()
+
 # Source files
 set(DISORTPP_SOURCES
     src/DisortConfig.cpp
@@ -54,6 +68,20 @@ target_include_directories(disortpp
 
 target_link_libraries(disortpp PUBLIC Eigen3::Eigen)
 
+# OpenMP (optional, for parallel spectral loops in Python bindings)
+find_package(OpenMP)
+
+# Python bindings (optional)
+if(BUILD_PYTHON_BINDINGS)
+    set_target_properties(disortpp PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    pybind11_add_module(disortpp_python src/python_bindings.cpp)
+    target_link_libraries(disortpp_python PRIVATE disortpp)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(disortpp_python PRIVATE OpenMP::OpenMP_CXX)
+    endif()
+    set_target_properties(disortpp_python PROPERTIES OUTPUT_NAME "disortpp")
+endif()
+
 # Tests
 enable_testing()
 add_subdirectory(tests)
@@ -75,5 +103,7 @@ message(STATUS "========== disort++ C++ Configuration ==========")
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "C++ standard: ${CMAKE_CXX_STANDARD}")
 message(STATUS "Eigen3: fetched via FetchContent (3.4.0)")
+message(STATUS "Python bindings: ${BUILD_PYTHON_BINDINGS}")
+message(STATUS "OpenMP: ${OpenMP_CXX_FOUND}")
 message(STATUS "==============================================")
 message(STATUS "")
