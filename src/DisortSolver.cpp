@@ -487,6 +487,7 @@ void DisortSolver::allocateWorkingArrays()
   similarity_d_inv_.resize(nn_);
   sym_A_s_.resize(nn_, nn_);
   sym_neg_B_s_.resize(nn_, nn_);
+  v_tmp_.resize(nn_);
 
   // Main azimuthal loop + computeBeamSource() + computeBeamSourceSpherical() + solve0()
   umu_vec_.resize(numu_);
@@ -854,9 +855,28 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
   phase_matrix_[lc].bottomLeftCorner(nn_, nn_) = cc_top_half_.rightCols(nn_);
   phase_matrix_[lc].bottomRightCorner(nn_, nn_) = cc_top_half_.leftCols(nn_);
 
+  // Steps 4–7: eigenvalue problem — dispatch to fixed-size or dynamic implementation
+  switch (nn_) {
+    case 2:  solveEigenCore<2>(lc);  return;
+    case 4:  solveEigenCore<4>(lc);  return;
+    case 6:  solveEigenCore<6>(lc);  return;
+    case 8:  solveEigenCore<8>(lc);  return;
+    case 10:  solveEigenCore<10>(lc);  return;
+    case 12:  solveEigenCore<12>(lc);  return;
+    case 14:  solveEigenCore<14>(lc);  return;
+    case 16: solveEigenCore<16>(lc); return;
+    default: solveEigenCoreDynamic(lc); return;
+  }
+}
+
+
+// ============================================================================
+// solveEigenCoreDynamic — dynamic-size fallback for unusual NN values
+// ============================================================================
+
+void DisortSolver::solveEigenCoreDynamic(int lc)
+{
   // Step 4: build alpha_minus_beta_ and alpha_plus_beta_ for the reduced eigenvalue problem.
-  // alpha_minus_beta_(iq,jq) = (cc_top(iq,jq) - cc_top(iq,jq+nn_)) / quad_angle_(iq)
-  // alpha_plus_beta_(iq,jq) = (cc_top(iq,jq) + cc_top(iq,jq+nn_)) / quad_angle_(iq)
   for (int iq = 0; iq < nn_; ++iq) {
     const double inv_cmu = 1.0 / quad_angle_(iq);
     alpha_minus_beta_.row(iq).noalias() = inv_cmu * (cc_top_half_.row(iq).head(nn_)
@@ -867,12 +887,7 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
     alpha_plus_beta_(iq, iq) -= inv_cmu;
   }
 
-  // Symmetrize the eigenvalue problem via similarity transform D = diag(sqrt(cwt*mu)).
-  // A_s = D * alpha_plus_beta_ * D^{-1}  (symmetric)
-  // B_s = D * alpha_minus_beta_ * D^{-1}  (symmetric, negative definite for omega<1)
-  // We want eigenvalues of M = (α+β)(α-β). Since D*M*D^{-1} = A_s*B_s has the same eigenvalues,
-  // and -B_s is SPD for omega<1, we factor -B_s = L*L^T and solve the symmetric problem
-  // S = -L^T * A_s * L whose eigenvalues equal those of M.
+  // Symmetrize via similarity transform D = diag(sqrt(cwt*mu))
   for (int i = 0; i < nn_; ++i) {
     for (int j = 0; j < nn_; ++j) {
       sym_A_s_(i, j) = similarity_d_(i) * alpha_plus_beta_(i, j) * similarity_d_inv_(j);
@@ -880,44 +895,33 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
     }
   }
 
-  // For non-conservative scattering (omega < 1), -B_s is SPD — use fast Cholesky path.
-  // For conservative scattering (omega = 1), -B_s is only PSD — fall back to general solver.
   bool use_spd_path = (scaled_ssa_[lc] < 1.0 - 1e-12);
   if (use_spd_path) {
     cholesky_.compute(sym_neg_B_s_);
     use_spd_path = (cholesky_.info() == Eigen::Success);
   }
   if (use_spd_path) {
-    // Fast symmetric path: -B_s is SPD
-    // Form S = L^T * (-A_s) * L  (symmetric, eigenvalues = k^2 > 0)
     const auto& L = cholesky_.matrixL();
     eigen_product_.noalias() = -sym_A_s_ * L;
-    sym_neg_B_s_.noalias() = L.transpose() * eigen_product_;  // reuse sym_neg_B_s_ as S
+    sym_neg_B_s_.noalias() = L.transpose() * eigen_product_;
 
     sym_eig_solver_.compute(sym_neg_B_s_);
     eigenvalues_tmp_ = sym_eig_solver_.eigenvalues();
 
-    // Recover eigenvectors of M: u = D^{-1} * L^{-T} * w
-    Eigen::MatrixXd Lt = L.transpose();
+    const auto& U = cholesky_.matrixU();
     for (int i = 0; i < nn_; ++i) {
-      Eigen::VectorXd v = Lt.triangularView<Eigen::Upper>().solve(
-                            sym_eig_solver_.eigenvectors().col(i));
+      v_tmp_.noalias() = U.solve(sym_eig_solver_.eigenvectors().col(i));
       for (int j = 0; j < nn_; ++j) {
-        eigenvectors_tmp_(j, i) = similarity_d_inv_(j) * v(j);
+        eigenvectors_tmp_(j, i) = similarity_d_inv_(j) * v_tmp_(j);
       }
     }
-
-    // SelfAdjointEigenSolver returns eigenvalues in ascending order — no sort needed.
   } else {
-    // Fallback for conservative scattering (omega=1) or other degenerate cases:
-    // -B_s is not SPD, use general eigensolver on the product matrix
     eigen_product_.noalias() = alpha_plus_beta_ * alpha_minus_beta_;
     eig_solver_.compute(eigen_product_, true);
 
     const auto& cevals = eig_solver_.eigenvalues();
     const auto& cevecs = eig_solver_.eigenvectors();
 
-    // Sort by eigenvalue magnitude (ascending)
     for (int i = 0; i < nn_; ++i) sort_indices_tmp_[i] = i;
     std::sort(sort_indices_tmp_.begin(), sort_indices_tmp_.end(),
           [&cevals](int a, int b) {
@@ -932,16 +936,14 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
     }
   }
 
-  // Extract eigenvalues and compute k = sqrt(|λ|)
-  // Note: eigenvalues are sorted by magnitude in ascending order
-  // Store them to match C convention: KK(1..nn) = negative, KK(nn+1..num_streams) = positive
+  // Extract eigenvalues: k = sqrt(|λ|)
   for (int iq = 0; iq < nn_; ++iq) {
     reduced_eigenvalues_(iq) = std::sqrt(std::abs(eigenvalues_tmp_(iq)));
-    eigenvalues_[lc](iq + nn_) = reduced_eigenvalues_(iq);       // Positive eigenvalue
-    eigenvalues_[lc](nn_ - 1 - iq) = -reduced_eigenvalues_(iq);  // Negative eigenvalue (reversed order)
+    eigenvalues_[lc](iq + nn_) = reduced_eigenvalues_(iq);
+    eigenvalues_[lc](nn_ - 1 - iq) = -reduced_eigenvalues_(iq);
   }
 
-  // Compute eigenvectors (G+) + (G-) and store temporarily in alpha_plus_beta_
+  // Compute eigenvectors (G+) + (G-) via alpha_minus_beta * eigenvectors_tmp / k
   for (int jq = 0; jq < nn_; ++jq) {
     for (int iq = 0; iq < nn_; ++iq) {
       double sum = 0.0;
@@ -952,22 +954,19 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
     }
   }
 
-  // Recover eigenvectors G+, G- from their sum and difference
+  // Recover G+, G- and store in reduced_eigenvectors_ and eigenvectors_[lc]
   for (int jq = 0; jq < nn_; ++jq) {
     for (int iq = 0; iq < nn_; ++iq) {
       double gpplgm = alpha_plus_beta_(iq, jq);
       double gpmigm = eigenvectors_tmp_(iq, jq);
 
-      // Eigenvectors for positive eigenvalues
       reduced_eigenvectors_(iq, jq) = 0.5 * (gpplgm + gpmigm);
       reduced_eigenvectors_(iq + nn_, jq) = 0.5 * (gpplgm - gpmigm);
 
-      // Eigenvectors for negative eigenvalues
       gpplgm *= -1.0;
       reduced_eigenvectors_(iq, jq + nn_) = 0.5 * (gpplgm + gpmigm);
       reduced_eigenvectors_(iq + nn_, jq + nn_) = 0.5 * (gpplgm - gpmigm);
 
-      // Store in eigenvectors_ array with symmetry reordering
       eigenvectors_[lc](nn_ + iq, nn_ + jq) = reduced_eigenvectors_(iq, jq);
       eigenvectors_[lc](nn_ - iq - 1, nn_ + jq) = reduced_eigenvectors_(iq + nn_, jq);
       eigenvectors_[lc](nn_ + iq, nn_ - jq - 1) = reduced_eigenvectors_(iq, jq + nn_);
@@ -976,7 +975,142 @@ void DisortSolver::solveEigen(int lc, int azimuth_mode)
   }
 }
 
-void DisortSolver::setMatrix(double kronecker_mode_0, bool lyrcut) 
+// ============================================================================
+// solveEigenCore<NN> — fixed-size eigenvalue computation for common NN values
+// ============================================================================
+
+template<int NN>
+void DisortSolver::solveEigenCore(int lc)
+{
+  using HalfMat = Eigen::Matrix<double, NN, NN>;
+  using HalfVec = Eigen::Matrix<double, NN, 1>;
+
+  // Step 4: build alpha_minus_beta and alpha_plus_beta from cc_top_half_
+  HalfMat amb, apb;
+  for (int iq = 0; iq < NN; ++iq) {
+    const double inv_cmu = 1.0 / quad_angle_(iq);
+    for (int jq = 0; jq < NN; ++jq) {
+      amb(iq, jq) = inv_cmu * (cc_top_half_(iq, jq) - cc_top_half_(iq, jq + NN));
+      apb(iq, jq) = inv_cmu * (cc_top_half_(iq, jq) + cc_top_half_(iq, jq + NN));
+    }
+    amb(iq, iq) -= inv_cmu;
+    apb(iq, iq) -= inv_cmu;
+  }
+
+  // Symmetrize via similarity transform D = diag(sqrt(cwt*mu))
+  HalfMat A_s, neg_B_s;
+  for (int i = 0; i < NN; ++i) {
+    for (int j = 0; j < NN; ++j) {
+      A_s(i, j) = similarity_d_(i) * apb(i, j) * similarity_d_inv_(j);
+      neg_B_s(i, j) = -similarity_d_(i) * amb(i, j) * similarity_d_inv_(j);
+    }
+  }
+
+  // Step 5: Eigenvalue solve
+  HalfVec evals;
+  HalfMat evecs;
+
+  bool use_spd_path = (scaled_ssa_[lc] < 1.0 - 1e-12);
+  if (use_spd_path) {
+    Eigen::LLT<HalfMat> chol(neg_B_s);
+    use_spd_path = (chol.info() == Eigen::Success);
+    if (use_spd_path) {
+      const auto& L = chol.matrixL();
+      HalfMat product;
+      product.noalias() = -A_s * L;
+      HalfMat S;
+      S.noalias() = L.transpose() * product;
+
+      Eigen::SelfAdjointEigenSolver<HalfMat> eig(S);
+      evals = eig.eigenvalues();
+
+      // Recover eigenvectors: u = D^{-1} * L^{-T} * w
+      const auto& U = chol.matrixU();
+      for (int i = 0; i < NN; ++i) {
+        HalfVec v = U.solve(eig.eigenvectors().col(i));
+        for (int j = 0; j < NN; ++j) {
+          evecs(j, i) = similarity_d_inv_(j) * v(j);
+        }
+      }
+    }
+  }
+  if (!use_spd_path) {
+    // Fallback for conservative scattering (omega=1) or degenerate cases
+    HalfMat product;
+    product.noalias() = apb * amb;
+    Eigen::EigenSolver<HalfMat> eig(product, true);
+
+    const auto& cevals = eig.eigenvalues();
+    const auto& cevecs = eig.eigenvectors();
+
+    std::array<int, NN> idx;
+    for (int i = 0; i < NN; ++i) idx[i] = i;
+    std::sort(idx.begin(), idx.end(),
+          [&cevals](int a, int b) {
+            return std::abs(cevals(a)) < std::abs(cevals(b));
+          });
+
+    for (int i = 0; i < NN; ++i) {
+      evals(i) = cevals(idx[i]).real();
+      for (int j = 0; j < NN; ++j) {
+        evecs(j, i) = cevecs(j, idx[i]).real();
+      }
+    }
+  }
+
+  // Step 6: Extract eigenvalues: k = sqrt(|λ|)
+  HalfVec reduced_evals;
+  for (int iq = 0; iq < NN; ++iq) {
+    reduced_evals(iq) = std::sqrt(std::abs(evals(iq)));
+    eigenvalues_[lc](iq + NN) = reduced_evals(iq);
+    eigenvalues_[lc](NN - 1 - iq) = -reduced_evals(iq);
+  }
+
+  // Step 7: Compute eigenvectors (G+) + (G-) via amb * evecs / k
+  HalfMat gpplgm;
+  for (int jq = 0; jq < NN; ++jq) {
+    for (int iq = 0; iq < NN; ++iq) {
+      double sum = 0.0;
+      for (int kq = 0; kq < NN; ++kq) {
+        sum += amb(iq, kq) * evecs(kq, jq);
+      }
+      gpplgm(iq, jq) = sum / reduced_evals(jq);
+    }
+  }
+
+  // Recover G+, G- and store in reduced_eigenvectors_ and eigenvectors_[lc]
+  for (int jq = 0; jq < NN; ++jq) {
+    for (int iq = 0; iq < NN; ++iq) {
+      double gp = gpplgm(iq, jq);
+      double gm = evecs(iq, jq);
+
+      reduced_eigenvectors_(iq, jq) = 0.5 * (gp + gm);
+      reduced_eigenvectors_(iq + NN, jq) = 0.5 * (gp - gm);
+
+      gp = -gp;
+      reduced_eigenvectors_(iq, jq + NN) = 0.5 * (gp + gm);
+      reduced_eigenvectors_(iq + NN, jq + NN) = 0.5 * (gp - gm);
+
+      eigenvectors_[lc](NN + iq, NN + jq) = reduced_eigenvectors_(iq, jq);
+      eigenvectors_[lc](NN - iq - 1, NN + jq) = reduced_eigenvectors_(iq + NN, jq);
+      eigenvectors_[lc](NN + iq, NN - jq - 1) = reduced_eigenvectors_(iq, jq + NN);
+      eigenvectors_[lc](NN - iq - 1, NN - jq - 1) = reduced_eigenvectors_(iq + NN, jq + NN);
+    }
+  }
+}
+
+// Explicit instantiations for common NN values
+template void DisortSolver::solveEigenCore<2>(int lc);
+template void DisortSolver::solveEigenCore<4>(int lc);
+template void DisortSolver::solveEigenCore<6>(int lc);
+template void DisortSolver::solveEigenCore<8>(int lc);
+template void DisortSolver::solveEigenCore<10>(int lc);
+template void DisortSolver::solveEigenCore<12>(int lc);
+template void DisortSolver::solveEigenCore<14>(int lc);
+template void DisortSolver::solveEigenCore<16>(int lc);
+
+
+void DisortSolver::setMatrix(double kronecker_mode_0, bool lyrcut)
 {
   /*
    * Build the banded coefficient matrix for boundary value problem.

@@ -157,6 +157,22 @@ private:
   void solveEigen(int lc, int azimuth_mode);
 
   /**
+   * @brief Core eigenvalue computation with compile-time NN for fixed-size Eigen types
+   *
+   * Performs steps 4–7 of solveEigen (alpha/beta construction, symmetrization,
+   * Cholesky + eigensolve, eigenvector recovery) using stack-allocated fixed-size
+   * matrices. Called after solveEigen computes cc_top_half_ and phase_matrix_.
+   *
+   * @tparam NN Half the number of streams (compile-time constant)
+   * @param lc Layer index
+   */
+  template<int NN>
+  void solveEigenCore(int lc);
+
+  /// Dynamic-size fallback for solveEigenCore when NN is not in {2, 4, 8, 16}
+  void solveEigenCoreDynamic(int lc);
+
+  /**
    * @brief Build coefficient matrix for boundary conditions
    *
    * Converts c_set_matrix() from original code.
@@ -502,6 +518,7 @@ private:
   Eigen::VectorXd similarity_d_inv_;   ///< D^{-1} = diag(1/sqrt(cwt * mu)) (nn)
   Eigen::MatrixXd sym_A_s_;            ///< Scratch: symmetrized alpha_plus_beta_ (nn x nn)
   Eigen::MatrixXd sym_neg_B_s_;        ///< Scratch: symmetrized -alpha_minus_beta_ (nn x nn)
+  Eigen::VectorXd v_tmp_;              ///< Scratch: eigenvector recovery from triangular solve (nn)
   std::vector<int>    sort_indices_tmp_;             ///< Eigenvalue sort permutation (nn)
 
   // Main azimuthal loop scratch (called num_streams times per solve, e.g. 16×)
