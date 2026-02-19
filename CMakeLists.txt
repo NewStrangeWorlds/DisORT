@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
-project(disortpp VERSION 2.1.3 LANGUAGES CXX)
+project(disortpp VERSION 1.0 LANGUAGES CXX)
 
 # Options
 option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" OFF)
+option(DISORTPP_MARCH_NATIVE "Use -march=native optimization (disable for portable binaries)" ON)
 
 # C++17 Standard
 set(CMAKE_CXX_STANDARD 17)
@@ -15,8 +16,15 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Compiler flags
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wextra -pedantic")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -DEIGEN_NO_DEBUG")
+if(MSVC)
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG /DEIGEN_NO_DEBUG")
+else()
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -Wextra -pedantic")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -DEIGEN_NO_DEBUG")
+    if(DISORTPP_MARCH_NATIVE)
+        string(APPEND CMAKE_CXX_FLAGS_RELEASE " -march=native")
+    endif()
+endif()
 
 # Dependencies: Eigen3 via FetchContent (downloaded into _deps/)
 include(FetchContent)
@@ -30,7 +38,13 @@ FetchContent_Declare(
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(eigen)
+# Use manual populate + EXCLUDE_FROM_ALL to prevent Eigen's install targets
+# from polluting the Python wheel with thousands of header files
+FetchContent_GetProperties(eigen)
+if(NOT eigen_POPULATED)
+    FetchContent_Populate(eigen)
+    add_subdirectory(${eigen_SOURCE_DIR} ${eigen_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
 
 # Dependencies: pybind11 via FetchContent (optional, for Python bindings)
 if(BUILD_PYTHON_BINDINGS)
@@ -80,6 +94,7 @@ if(BUILD_PYTHON_BINDINGS)
         target_link_libraries(disortpp_python PRIVATE OpenMP::OpenMP_CXX)
     endif()
     set_target_properties(disortpp_python PROPERTIES OUTPUT_NAME "disortpp")
+    install(TARGETS disortpp_python LIBRARY DESTINATION .)
 endif()
 
 # Tests

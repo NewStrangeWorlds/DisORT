@@ -137,6 +137,7 @@ static std::vector<FluxResult> solveFluxSpectralBands(
 
 PYBIND11_MODULE(disortpp, m) {
   m.doc() = "DisORT++ - Discrete Ordinates Radiative Transfer solver";
+  m.attr("__version__") = "1.0";
 
   // ========================================================================
   // Enums
