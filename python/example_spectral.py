@@ -5,8 +5,15 @@ DisORT++ Python Interface — Spectral Loop Example
 Demonstrates the spectral loop functions that run the wavenumber iteration
 entirely in C++, avoiding per-call Python overhead:
 
-  1. solve_spectral_bands     — general solver, wavenumber bands
-  2. solve_flux_spectral_bands — fast flux solver, wavenumber bands
+  1. Thermal emission spectrum (solve_spectral_bands)
+  2. Wavelength-dependent scattering with Python loop
+  3. Performance comparison (C++ loop vs Python loop)
+  4. Per-wavelength overrides with solve_flux_spectral_bands
+  5. Thermal emission with per-wavelength overrides (solve_spectral_bands)
+
+Examples 4 and 5 show how to pass wavelength-dependent arrays (delta_tau,
+single_scat_albedo, surface_albedo, emissivity_top, etc.) directly to
+the C++ spectral loop, so the entire computation stays in C++.
 
 Build the Python module first:
     cd DisORT/build
@@ -245,6 +252,181 @@ def example_performance():
 
 
 # ============================================================================
+# Example 4: Wavelength-dependent overrides with solve_flux_spectral_bands
+# ============================================================================
+
+def example_spectral_overrides():
+    """
+    Demonstrate per-wavelength overrides for the spectral loop functions.
+
+    This repeats the Rayleigh scattering scenario from Example 2, but instead
+    of looping in Python, we pass per-wavelength arrays (delta_tau,
+    single_scat_albedo, surface_albedo) directly to solve_flux_spectral_bands.
+    The entire computation runs in C++ (and OpenMP-parallel if available).
+    """
+    print("=" * 70)
+    print("Example 4: Wavelength-dependent overrides (solve_flux_spectral_bands)")
+    print("=" * 70)
+
+    nlyr = 3
+    nstr = 16
+
+    # Wavenumber grid: 5000-25000 cm^-1 (0.4-2.0 um) in 500 cm^-1 bands
+    band_width = 500.0
+    wn_edges = np.arange(5000.0, 25001.0, band_width)
+    bands = [(wn_edges[i], wn_edges[i + 1]) for i in range(len(wn_edges) - 1)]
+    band_centers = np.array([(lo + hi) / 2 for lo, hi in bands])
+    n_bands = len(bands)
+
+    # --- Build per-wavelength arrays ---
+
+    # Reference optical depth at 10000 cm^-1
+    tau_ref = np.array([0.05, 0.1, 0.2])
+    wn_ref = 10000.0
+
+    # delta_tau: Rayleigh scaling tau ~ (wn/wn_ref)^4  [n_bands, nlyr]
+    delta_tau = []
+    for wn in band_centers:
+        scale = (wn / wn_ref) ** 4
+        delta_tau.append(list(tau_ref * scale))
+
+    # single_scat_albedo: pure scattering everywhere [n_bands, nlyr]
+    single_scat_albedo = [[1.0] * nlyr] * n_bands
+
+    # surface_albedo: wavelength-dependent, e.g. increasing toward longer
+    # wavelengths (mimicking vegetation or ocean albedo variations) [n_bands]
+    surface_albedo = list(0.02 + 0.18 * (band_centers - 5000.0) / 20000.0)
+
+    # --- Set up the base config (quantities that don't change with wn) ---
+    cfg = disortpp.DisortFluxConfig(nlyr, nstr)
+    cfg.direct_beam_flux = 1.0
+    cfg.direct_beam_mu = 0.5
+    cfg.allocate()
+
+    # Set a dummy delta_tau / ssa / phase function (will be overridden)
+    cfg.delta_tau = list(tau_ref)
+    cfg.single_scat_albedo = [1.0] * nlyr
+    cfg.set_rayleigh()
+
+    # --- Solve all bands in one C++ call with overrides ---
+    results = disortpp.solve_flux_spectral_bands(
+        cfg, bands,
+        delta_tau=delta_tau,
+        single_scat_albedo=single_scat_albedo,
+        surface_albedo=surface_albedo,
+    )
+
+    # Extract fluxes
+    flux_up_toa = np.array([r.flux_up[0] for r in results])
+    flux_down_boa = np.array([r.total_flux_down(nlyr) for r in results])
+    wavelength_um = 1e4 / band_centers
+
+    print(f"\n  {n_bands} wavenumber bands from {wn_edges[0]:.0f} "
+          f"to {wn_edges[-1]:.0f} cm^-1")
+    print(f"\n  Per-wavelength overrides: delta_tau, single_scat_albedo, surface_albedo")
+    print(f"\n  {'Wavelength [um]':>16}  {'Wn [cm^-1]':>12}  "
+          f"{'Albedo_sfc':>10}  {'Flux Up TOA':>12}  {'Flux Down BOA':>14}")
+    print("  " + "-" * 68)
+
+    for i in range(0, n_bands, 4):
+        print(f"  {wavelength_um[i]:16.3f}  {band_centers[i]:12.0f}  "
+              f"{surface_albedo[i]:10.4f}  {flux_up_toa[i]:12.6f}  "
+              f"{flux_down_boa[i]:14.6f}")
+
+    # Planetary albedo spectrum
+    flux_in = 1.0 * 0.5  # fbeam * mu0
+    albedo = flux_up_toa / flux_in
+    print(f"\n  Planetary albedo at 2.0 um (wn= 5000): {albedo[0]:.4f}")
+    print(f"  Planetary albedo at 0.5 um (wn=20000): {albedo[-4]:.4f}")
+    print()
+
+
+# ============================================================================
+# Example 5: Thermal emission with per-wavelength overrides (general solver)
+# ============================================================================
+
+def example_thermal_overrides():
+    """
+    Demonstrate per-wavelength overrides for the general solver
+    (solve_spectral_bands) with thermal emission.
+
+    Models an atmosphere where the optical depth and emissivity vary across
+    the infrared spectrum.
+    """
+    print("=" * 70)
+    print("Example 5: Thermal overrides (solve_spectral_bands)")
+    print("=" * 70)
+
+    nlyr = 4
+    nstr = 8
+
+    # Wavenumber bands: 200-2000 cm^-1 in 100 cm^-1 steps
+    band_width = 100.0
+    wn_edges = np.arange(200.0, 2001.0, band_width)
+    bands = [(wn_edges[i], wn_edges[i + 1]) for i in range(len(wn_edges) - 1)]
+    band_centers = np.array([(lo + hi) / 2 for lo, hi in bands])
+    n_bands = len(bands)
+
+    # --- Base config ---
+    cfg = disortpp.DisortConfig(nlyr, nstr)
+    cfg.flags.use_lambertian_surface = True
+    cfg.flags.use_thermal_emission = True
+    cfg.flags.comp_only_fluxes = True
+    cfg.allocate()
+
+    # Base optical properties (will be overridden per wavelength)
+    cfg.delta_tau = [0.5, 0.5, 0.5, 0.5]
+    cfg.single_scat_albedo = [0.3, 0.3, 0.3, 0.3]
+    cfg.set_isotropic()
+
+    # Temperature profile (constant across wavelength)
+    cfg.temperature = [180.0, 210.0, 240.0, 270.0, 300.0]
+    cfg.bc.direct_beam_flux = 0.0
+    cfg.bc.temperature_top = 180.0
+    cfg.bc.temperature_bottom = 300.0
+    cfg.bc.surface_albedo = 0.0
+
+    # --- Per-wavelength overrides ---
+
+    # Optical depth increases toward longer wavelengths (lower wavenumbers)
+    # Mimics a gas with stronger absorption at lower wavenumbers
+    tau_base = np.array([0.2, 0.5, 1.0, 2.0])
+    delta_tau = []
+    for wn in band_centers:
+        scale = (1000.0 / wn) ** 2  # stronger absorption at lower wn
+        delta_tau.append(list(tau_base * scale))
+
+    # Emissivity at top: drops at window regions (higher wavenumbers)
+    emissivity_top = list(0.5 + 0.5 * np.exp(-((band_centers - 600) / 300) ** 2))
+
+    # --- Solve ---
+    results = disortpp.solve_spectral_bands(
+        cfg, bands,
+        delta_tau=delta_tau,
+        emissivity_top=emissivity_top,
+    )
+
+    flux_up_toa = np.array([r.flux_up[0] for r in results])
+    flux_down_boa = np.array([r.flux_down[-1] for r in results])
+
+    print(f"\n  {n_bands} wavenumber bands from {wn_edges[0]:.0f} "
+          f"to {wn_edges[-1]:.0f} cm^-1")
+    print(f"\n  Per-wavelength overrides: delta_tau, emissivity_top")
+    print(f"\n  {'Band [cm^-1]':>16}  {'Emiss_top':>10}  "
+          f"{'Flux Up TOA':>12}  {'Flux Down BOA':>14}")
+    print("  " + "-" * 56)
+
+    for i in range(0, n_bands, 2):
+        lo, hi = bands[i]
+        print(f"  {lo:7.0f}-{hi:5.0f}  {emissivity_top[i]:10.4f}  "
+              f"{flux_up_toa[i]:12.4f}  {flux_down_boa[i]:14.4f}")
+
+    total_up = np.sum(flux_up_toa)
+    print(f"\n  Total upward flux at TOA: {total_up:.4f}")
+    print()
+
+
+# ============================================================================
 # Main
 # ============================================================================
 
@@ -252,4 +434,6 @@ if __name__ == "__main__":
     example_thermal_spectrum()
     example_scattering_spectrum()
     example_performance()
+    example_spectral_overrides()
+    example_thermal_overrides()
     print("All examples completed successfully.")

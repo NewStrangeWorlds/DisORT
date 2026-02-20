@@ -17,11 +17,49 @@ namespace py = pybind11;
 using namespace disortpp;
 
 // ============================================================================
+// Per-wavelength overrides for spectral loop functions
+// ============================================================================
+
+struct SpectralOverrides {
+    std::vector<std::vector<double>> delta_tau;                        // [n_wl][num_layers]
+    std::vector<std::vector<double>> single_scat_albedo;               // [n_wl][num_layers]
+    std::vector<std::vector<std::vector<double>>> phase_function_moments; // [n_wl][num_layers][nmom+1]
+    std::vector<double> surface_albedo;        // [n_wl]
+    std::vector<double> emissivity_top;        // [n_wl]
+    std::vector<double> direct_beam_flux;      // [n_wl]
+    std::vector<double> isotropic_flux_top;    // [n_wl]
+    std::vector<double> isotropic_flux_bottom; // [n_wl]
+};
+
+inline void applyOverrides(DisortConfig& cfg, const SpectralOverrides& ov, int i) {
+    if (!ov.delta_tau.empty()) cfg.delta_tau = ov.delta_tau[i];
+    if (!ov.single_scat_albedo.empty()) cfg.single_scat_albedo = ov.single_scat_albedo[i];
+    if (!ov.phase_function_moments.empty()) cfg.phase_function_moments = ov.phase_function_moments[i];
+    if (!ov.surface_albedo.empty()) cfg.bc.surface_albedo = ov.surface_albedo[i];
+    if (!ov.emissivity_top.empty()) cfg.bc.emissivity_top = ov.emissivity_top[i];
+    if (!ov.direct_beam_flux.empty()) cfg.bc.direct_beam_flux = ov.direct_beam_flux[i];
+    if (!ov.isotropic_flux_top.empty()) cfg.bc.isotropic_flux_top = ov.isotropic_flux_top[i];
+    if (!ov.isotropic_flux_bottom.empty()) cfg.bc.isotropic_flux_bottom = ov.isotropic_flux_bottom[i];
+}
+
+inline void applyOverrides(DisortFluxConfig& cfg, const SpectralOverrides& ov, int i) {
+    if (!ov.delta_tau.empty()) cfg.delta_tau = ov.delta_tau[i];
+    if (!ov.single_scat_albedo.empty()) cfg.single_scat_albedo = ov.single_scat_albedo[i];
+    if (!ov.phase_function_moments.empty()) cfg.phase_function_moments = ov.phase_function_moments[i];
+    if (!ov.surface_albedo.empty()) cfg.surface_albedo = ov.surface_albedo[i];
+    if (!ov.emissivity_top.empty()) cfg.emissivity_top = ov.emissivity_top[i];
+    if (!ov.direct_beam_flux.empty()) cfg.direct_beam_flux = ov.direct_beam_flux[i];
+    if (!ov.isotropic_flux_top.empty()) cfg.isotropic_flux_top = ov.isotropic_flux_top[i];
+    if (!ov.isotropic_flux_bottom.empty()) cfg.isotropic_flux_bottom = ov.isotropic_flux_bottom[i];
+}
+
+// ============================================================================
 // Spectral loop helpers — run the wavenumber loop in C++ with GIL released
 // ============================================================================
 
 static std::vector<DisortResult> solveSpectral(
-    DisortConfig config, const std::vector<double>& wavenumbers) {
+    DisortConfig config, const std::vector<double>& wavenumbers,
+    const SpectralOverrides& ov) {
   const int n = static_cast<int>(wavenumbers.size());
   std::vector<DisortResult> results(n);
   #pragma omp parallel
@@ -32,6 +70,7 @@ static std::vector<DisortResult> solveSpectral(
     for (int i = 0; i < n; ++i) {
       local_config.wavenumber_low = wavenumbers[i];
       local_config.wavenumber_high = wavenumbers[i];
+      applyOverrides(local_config, ov, i);
       results[i] = solver.solve(local_config);
     }
   }
@@ -40,7 +79,8 @@ static std::vector<DisortResult> solveSpectral(
 
 static std::vector<DisortResult> solveSpectralBands(
     DisortConfig config,
-    const std::vector<std::pair<double, double>>& wavenumber_bands) {
+    const std::vector<std::pair<double, double>>& wavenumber_bands,
+    const SpectralOverrides& ov) {
   const int n = static_cast<int>(wavenumber_bands.size());
   std::vector<DisortResult> results(n);
   #pragma omp parallel
@@ -51,6 +91,7 @@ static std::vector<DisortResult> solveSpectralBands(
     for (int i = 0; i < n; ++i) {
       local_config.wavenumber_low = wavenumber_bands[i].first;
       local_config.wavenumber_high = wavenumber_bands[i].second;
+      applyOverrides(local_config, ov, i);
       results[i] = solver.solve(local_config);
     }
   }
@@ -59,7 +100,8 @@ static std::vector<DisortResult> solveSpectralBands(
 
 template<int NStr>
 static std::vector<FluxResult> solveFluxSpectralImpl(
-    DisortFluxConfig& config, const std::vector<double>& wavenumbers) {
+    DisortFluxConfig& config, const std::vector<double>& wavenumbers,
+    const SpectralOverrides& ov) {
   const int n = static_cast<int>(wavenumbers.size());
   std::vector<FluxResult> results(n);
   #pragma omp parallel
@@ -70,6 +112,7 @@ static std::vector<FluxResult> solveFluxSpectralImpl(
     for (int i = 0; i < n; ++i) {
       local_config.wavenumber_low = wavenumbers[i];
       local_config.wavenumber_high = wavenumbers[i];
+      applyOverrides(local_config, ov, i);
       results[i] = solver.solve(local_config);
     }
   }
@@ -77,17 +120,18 @@ static std::vector<FluxResult> solveFluxSpectralImpl(
 }
 
 static std::vector<FluxResult> solveFluxSpectral(
-    DisortFluxConfig& config, const std::vector<double>& wavenumbers) {
+    DisortFluxConfig& config, const std::vector<double>& wavenumbers,
+    const SpectralOverrides& ov) {
   switch (config.num_streams) {
-    case 4:  return solveFluxSpectralImpl<4>(config, wavenumbers);
-    case 6:  return solveFluxSpectralImpl<6>(config, wavenumbers);
-    case 8:  return solveFluxSpectralImpl<8>(config, wavenumbers);
-    case 10: return solveFluxSpectralImpl<10>(config, wavenumbers);
-    case 12: return solveFluxSpectralImpl<12>(config, wavenumbers);
-    case 14: return solveFluxSpectralImpl<14>(config, wavenumbers);
-    case 16: return solveFluxSpectralImpl<16>(config, wavenumbers);
-    case 32: return solveFluxSpectralImpl<32>(config, wavenumbers);
-    case 64: return solveFluxSpectralImpl<64>(config, wavenumbers);
+    case 4:  return solveFluxSpectralImpl<4>(config, wavenumbers, ov);
+    case 6:  return solveFluxSpectralImpl<6>(config, wavenumbers, ov);
+    case 8:  return solveFluxSpectralImpl<8>(config, wavenumbers, ov);
+    case 10: return solveFluxSpectralImpl<10>(config, wavenumbers, ov);
+    case 12: return solveFluxSpectralImpl<12>(config, wavenumbers, ov);
+    case 14: return solveFluxSpectralImpl<14>(config, wavenumbers, ov);
+    case 16: return solveFluxSpectralImpl<16>(config, wavenumbers, ov);
+    case 32: return solveFluxSpectralImpl<32>(config, wavenumbers, ov);
+    case 64: return solveFluxSpectralImpl<64>(config, wavenumbers, ov);
     default:
       throw std::invalid_argument(
           "Unsupported num_streams=" + std::to_string(config.num_streams) +
@@ -98,7 +142,8 @@ static std::vector<FluxResult> solveFluxSpectral(
 template<int NStr>
 static std::vector<FluxResult> solveFluxSpectralBandsImpl(
     DisortFluxConfig& config,
-    const std::vector<std::pair<double, double>>& wavenumber_bands) {
+    const std::vector<std::pair<double, double>>& wavenumber_bands,
+    const SpectralOverrides& ov) {
   const int n = static_cast<int>(wavenumber_bands.size());
   std::vector<FluxResult> results(n);
   #pragma omp parallel
@@ -109,6 +154,7 @@ static std::vector<FluxResult> solveFluxSpectralBandsImpl(
     for (int i = 0; i < n; ++i) {
       local_config.wavenumber_low = wavenumber_bands[i].first;
       local_config.wavenumber_high = wavenumber_bands[i].second;
+      applyOverrides(local_config, ov, i);
       results[i] = solver.solve(local_config);
     }
   }
@@ -117,17 +163,18 @@ static std::vector<FluxResult> solveFluxSpectralBandsImpl(
 
 static std::vector<FluxResult> solveFluxSpectralBands(
     DisortFluxConfig& config,
-    const std::vector<std::pair<double, double>>& wavenumber_bands) {
+    const std::vector<std::pair<double, double>>& wavenumber_bands,
+    const SpectralOverrides& ov) {
   switch (config.num_streams) {
-    case 4:  return solveFluxSpectralBandsImpl<4>(config, wavenumber_bands);
-    case 6:  return solveFluxSpectralBandsImpl<6>(config, wavenumber_bands);
-    case 8:  return solveFluxSpectralBandsImpl<8>(config, wavenumber_bands);
-    case 10: return solveFluxSpectralBandsImpl<10>(config, wavenumber_bands);
-    case 12: return solveFluxSpectralBandsImpl<12>(config, wavenumber_bands);
-    case 14: return solveFluxSpectralBandsImpl<14>(config, wavenumber_bands);
-    case 16: return solveFluxSpectralBandsImpl<16>(config, wavenumber_bands);
-    case 32: return solveFluxSpectralBandsImpl<32>(config, wavenumber_bands);
-    case 64: return solveFluxSpectralBandsImpl<64>(config, wavenumber_bands);
+    case 4:  return solveFluxSpectralBandsImpl<4>(config, wavenumber_bands, ov);
+    case 6:  return solveFluxSpectralBandsImpl<6>(config, wavenumber_bands, ov);
+    case 8:  return solveFluxSpectralBandsImpl<8>(config, wavenumber_bands, ov);
+    case 10: return solveFluxSpectralBandsImpl<10>(config, wavenumber_bands, ov);
+    case 12: return solveFluxSpectralBandsImpl<12>(config, wavenumber_bands, ov);
+    case 14: return solveFluxSpectralBandsImpl<14>(config, wavenumber_bands, ov);
+    case 16: return solveFluxSpectralBandsImpl<16>(config, wavenumber_bands, ov);
+    case 32: return solveFluxSpectralBandsImpl<32>(config, wavenumber_bands, ov);
+    case 64: return solveFluxSpectralBandsImpl<64>(config, wavenumber_bands, ov);
     default:
       throw std::invalid_argument(
           "Unsupported num_streams=" + std::to_string(config.num_streams) +
@@ -533,42 +580,134 @@ PYBIND11_MODULE(disortpp, m) {
   // ========================================================================
 
   m.def("solve_spectral",
-      [](DisortConfig config, const std::vector<double>& wavenumbers) {
+      [](DisortConfig config, const std::vector<double>& wavenumbers,
+         std::vector<std::vector<double>> delta_tau,
+         std::vector<std::vector<double>> single_scat_albedo,
+         std::vector<std::vector<std::vector<double>>> phase_function_moments,
+         std::vector<double> surface_albedo,
+         std::vector<double> emissivity_top,
+         std::vector<double> direct_beam_flux,
+         std::vector<double> isotropic_flux_top,
+         std::vector<double> isotropic_flux_bottom) {
+        SpectralOverrides ov{
+            std::move(delta_tau), std::move(single_scat_albedo),
+            std::move(phase_function_moments),
+            std::move(surface_albedo), std::move(emissivity_top),
+            std::move(direct_beam_flux),
+            std::move(isotropic_flux_top), std::move(isotropic_flux_bottom)};
         py::gil_scoped_release release;
-        return solveSpectral(std::move(config), wavenumbers);
+        return solveSpectral(std::move(config), wavenumbers, ov);
       },
       py::arg("config"), py::arg("wavenumbers"),
+      py::arg("delta_tau") = std::vector<std::vector<double>>{},
+      py::arg("single_scat_albedo") = std::vector<std::vector<double>>{},
+      py::arg("phase_function_moments") = std::vector<std::vector<std::vector<double>>>{},
+      py::arg("surface_albedo") = std::vector<double>{},
+      py::arg("emissivity_top") = std::vector<double>{},
+      py::arg("direct_beam_flux") = std::vector<double>{},
+      py::arg("isotropic_flux_top") = std::vector<double>{},
+      py::arg("isotropic_flux_bottom") = std::vector<double>{},
       "Solve for a list of single wavenumbers (sets wavenumber_low = wavenumber_high = wn). "
+      "Optional per-wavelength arrays override the corresponding config values. "
       "The wavenumber loop runs entirely in C++. Returns a list of DisortResult.");
 
   m.def("solve_spectral_bands",
       [](DisortConfig config,
-         const std::vector<std::pair<double, double>>& wavenumber_bands) {
+         const std::vector<std::pair<double, double>>& wavenumber_bands,
+         std::vector<std::vector<double>> delta_tau,
+         std::vector<std::vector<double>> single_scat_albedo,
+         std::vector<std::vector<std::vector<double>>> phase_function_moments,
+         std::vector<double> surface_albedo,
+         std::vector<double> emissivity_top,
+         std::vector<double> direct_beam_flux,
+         std::vector<double> isotropic_flux_top,
+         std::vector<double> isotropic_flux_bottom) {
+        SpectralOverrides ov{
+            std::move(delta_tau), std::move(single_scat_albedo),
+            std::move(phase_function_moments),
+            std::move(surface_albedo), std::move(emissivity_top),
+            std::move(direct_beam_flux),
+            std::move(isotropic_flux_top), std::move(isotropic_flux_bottom)};
         py::gil_scoped_release release;
-        return solveSpectralBands(std::move(config), wavenumber_bands);
+        return solveSpectralBands(std::move(config), wavenumber_bands, ov);
       },
       py::arg("config"), py::arg("wavenumber_bands"),
+      py::arg("delta_tau") = std::vector<std::vector<double>>{},
+      py::arg("single_scat_albedo") = std::vector<std::vector<double>>{},
+      py::arg("phase_function_moments") = std::vector<std::vector<std::vector<double>>>{},
+      py::arg("surface_albedo") = std::vector<double>{},
+      py::arg("emissivity_top") = std::vector<double>{},
+      py::arg("direct_beam_flux") = std::vector<double>{},
+      py::arg("isotropic_flux_top") = std::vector<double>{},
+      py::arg("isotropic_flux_bottom") = std::vector<double>{},
       "Solve for a list of wavenumber bands (pairs of (low, high)). "
+      "Optional per-wavelength arrays override the corresponding config values. "
       "The wavenumber loop runs entirely in C++. Returns a list of DisortResult.");
 
   m.def("solve_flux_spectral",
-      [](DisortFluxConfig& config, const std::vector<double>& wavenumbers) {
+      [](DisortFluxConfig& config, const std::vector<double>& wavenumbers,
+         std::vector<std::vector<double>> delta_tau,
+         std::vector<std::vector<double>> single_scat_albedo,
+         std::vector<std::vector<std::vector<double>>> phase_function_moments,
+         std::vector<double> surface_albedo,
+         std::vector<double> emissivity_top,
+         std::vector<double> direct_beam_flux,
+         std::vector<double> isotropic_flux_top,
+         std::vector<double> isotropic_flux_bottom) {
+        SpectralOverrides ov{
+            std::move(delta_tau), std::move(single_scat_albedo),
+            std::move(phase_function_moments),
+            std::move(surface_albedo), std::move(emissivity_top),
+            std::move(direct_beam_flux),
+            std::move(isotropic_flux_top), std::move(isotropic_flux_bottom)};
         py::gil_scoped_release release;
-        return solveFluxSpectral(config, wavenumbers);
+        return solveFluxSpectral(config, wavenumbers, ov);
       },
       py::arg("config"), py::arg("wavenumbers"),
+      py::arg("delta_tau") = std::vector<std::vector<double>>{},
+      py::arg("single_scat_albedo") = std::vector<std::vector<double>>{},
+      py::arg("phase_function_moments") = std::vector<std::vector<std::vector<double>>>{},
+      py::arg("surface_albedo") = std::vector<double>{},
+      py::arg("emissivity_top") = std::vector<double>{},
+      py::arg("direct_beam_flux") = std::vector<double>{},
+      py::arg("isotropic_flux_top") = std::vector<double>{},
+      py::arg("isotropic_flux_bottom") = std::vector<double>{},
       "Solve for fluxes at a list of single wavenumbers. "
+      "Optional per-wavelength arrays override the corresponding config values. "
       "Dispatches to DisortFluxSolver based on config.num_streams. "
       "Returns a list of FluxResult.");
 
   m.def("solve_flux_spectral_bands",
       [](DisortFluxConfig& config,
-         const std::vector<std::pair<double, double>>& wavenumber_bands) {
+         const std::vector<std::pair<double, double>>& wavenumber_bands,
+         std::vector<std::vector<double>> delta_tau,
+         std::vector<std::vector<double>> single_scat_albedo,
+         std::vector<std::vector<std::vector<double>>> phase_function_moments,
+         std::vector<double> surface_albedo,
+         std::vector<double> emissivity_top,
+         std::vector<double> direct_beam_flux,
+         std::vector<double> isotropic_flux_top,
+         std::vector<double> isotropic_flux_bottom) {
+        SpectralOverrides ov{
+            std::move(delta_tau), std::move(single_scat_albedo),
+            std::move(phase_function_moments),
+            std::move(surface_albedo), std::move(emissivity_top),
+            std::move(direct_beam_flux),
+            std::move(isotropic_flux_top), std::move(isotropic_flux_bottom)};
         py::gil_scoped_release release;
-        return solveFluxSpectralBands(config, wavenumber_bands);
+        return solveFluxSpectralBands(config, wavenumber_bands, ov);
       },
       py::arg("config"), py::arg("wavenumber_bands"),
+      py::arg("delta_tau") = std::vector<std::vector<double>>{},
+      py::arg("single_scat_albedo") = std::vector<std::vector<double>>{},
+      py::arg("phase_function_moments") = std::vector<std::vector<std::vector<double>>>{},
+      py::arg("surface_albedo") = std::vector<double>{},
+      py::arg("emissivity_top") = std::vector<double>{},
+      py::arg("direct_beam_flux") = std::vector<double>{},
+      py::arg("isotropic_flux_top") = std::vector<double>{},
+      py::arg("isotropic_flux_bottom") = std::vector<double>{},
       "Solve for fluxes at a list of wavenumber bands (pairs of (low, high)). "
+      "Optional per-wavelength arrays override the corresponding config values. "
       "Dispatches to DisortFluxSolver based on config.num_streams. "
       "Returns a list of FluxResult.");
 }

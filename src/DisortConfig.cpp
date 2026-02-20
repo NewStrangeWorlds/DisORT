@@ -130,8 +130,8 @@ void DisortConfig::validate() const
       }
     }
 
-    // Mirrors C DISORT check: wavenumber_low >= 0 and wavenumber_high > wavenumber_low
-    if (wavenumber_low < 0.0 || wavenumber_high <= wavenumber_low) {
+    // Mirrors C DISORT check: wavenumber_low >= 0 and wavenumber_high >= wavenumber_low
+    if (wavenumber_low < 0.0 || wavenumber_high < wavenumber_low) {
       throw std::invalid_argument("Invalid wavenumber range for Planck function");
     }
   }

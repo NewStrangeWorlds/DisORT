@@ -105,8 +105,8 @@ void DisortFluxConfig::validate() const
         throw std::invalid_argument("temperature[" + std::to_string(lev) + "] must be >= 0");
       }
     }
-    if (wavenumber_low < 0.0 || wavenumber_low >= wavenumber_high) {
-      throw std::invalid_argument("wavenumber: need 0 <= wavenumber_low < wavenumber_high");
+    if (wavenumber_low < 0.0 || wavenumber_low > wavenumber_high) {
+      throw std::invalid_argument("wavenumber: need 0 <= wavenumber_low <= wavenumber_high");
     }
     if (temperature_top < 0.0 || temperature_bottom < 0.0) {
       throw std::invalid_argument("temperature_top and temperature_bottom must be >= 0");
