@@ -61,7 +61,7 @@ jobs:
     permissions:
       id-token: write
     environment:
-      name: pypi
+      name: pypi_release
       url: https://pypi.org/p/disortpp
 
     steps:

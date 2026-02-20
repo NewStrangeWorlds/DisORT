@@ -1,6 +1,3 @@
-#the executable
-ngam
-
 # build files from cmake
 build/*
 CMakeFiles/*

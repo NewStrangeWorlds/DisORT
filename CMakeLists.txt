@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(disortpp VERSION 1.0 LANGUAGES CXX)
+project(disortpp VERSION 1.0.3 LANGUAGES CXX)
 
 # Options
 option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" OFF)
