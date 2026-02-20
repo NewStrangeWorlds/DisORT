@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installation &mdash; DisORT++ 2.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=179ab080"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Quick Start" href="quickstart.html" />
+    <link rel="prev" title="DisORT++ Documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DisORT++
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#building-the-c-library">Building the C++ library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build-options">Build options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#building-with-python-bindings">Building with Python bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-disort-in-your-cmake-project">Using DisORT++ in your CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#c-quick-start">C++ quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#python-quick-start">Python quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#workflow-overview">Workflow overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#choosing-a-solver">Choosing a solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#level-and-layer-indexing">Level and layer indexing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#flux-only-calculation">Flux-only calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#full-intensity-calculation">Full intensity calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#fast-flux-solver">Fast flux solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#thermal-emission">Thermal emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#spectral-loop-thermal-emission-spectrum">Spectral loop (thermal emission spectrum)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#wavelength-dependent-scattering-python-loop">Wavelength-dependent scattering (Python loop)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#wavelength-dependent-scattering-spectral-overrides">Wavelength-dependent scattering (spectral overrides)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#thermal-emission-with-spectral-overrides">Thermal emission with spectral overrides</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">C++ API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cpp_api/index.html">C++ API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/types.html">Enumerations and Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#phasefunction">PhaseFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#boundaryconditiontype">BoundaryConditionType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#illuminationtype">IlluminationType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#brdftype">BrdfType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#messagetype">MessageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#verbositylevel">VerbosityLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/config.html">Configuration Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortflags">DisortFlags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#boundaryconditions">BoundaryConditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#brdf-specifications">BRDF specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortconfig">DisortConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortfluxconfig">DisortFluxConfig</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/solvers.html">Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/solvers.html#disortsolver">DisortSolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/solvers.html#disortfluxsolver-nstr">DisortFluxSolver&lt;NStr&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/results.html">Result Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/results.html#disortresult">DisortResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/results.html#fluxresult">FluxResult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/utilities.html">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#planck-function">Planck function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#phase-function-utilities">Phase function utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#legendre-polynomials">Legendre polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#linear-algebra">Linear algebra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="python_api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api/index.html#enumerations">Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/index.html#contents">Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/config.html">Python Configuration Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/solvers.html">Python Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/results.html">Python Result Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/spectral.html">Spectral Loop Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DisORT++</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>C++17</strong> compiler (GCC 7+, Clang 5+, MSVC 2017+)</p></li>
+<li><p><strong>CMake</strong> 3.15 or later</p></li>
+<li><p><strong>Eigen 3.4</strong> (fetched automatically via CMake FetchContent)</p></li>
+</ul>
+<p>Optional:</p>
+<ul class="simple">
+<li><p><strong>pybind11</strong> 2.13+ (fetched automatically when building Python bindings)</p></li>
+<li><p><strong>OpenMP</strong> (detected automatically; enables parallel spectral loops)</p></li>
+<li><p><strong>Python</strong> 3.8+ with <strong>NumPy</strong> (for using the Python interface)</p></li>
+</ul>
+</section>
+<section id="building-the-c-library">
+<h2>Building the C++ library<a class="headerlink" href="#building-the-c-library" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>DisORT
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</pre></div>
+</div>
+<p>CMake will download Eigen 3.4 into <code class="docutils literal notranslate"><span class="pre">build/_deps/</span></code> on the first build.
+Subsequent builds reuse the cached download.</p>
+<p>The build produces the static library <code class="docutils literal notranslate"><span class="pre">libdisortpp.a</span></code> and the test
+executable <code class="docutils literal notranslate"><span class="pre">tests/disortpp_tests</span></code>.</p>
+<section id="build-options">
+<h3>Build options<a class="headerlink" href="#build-options" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 15.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CMAKE_BUILD_TYPE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Release</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Release</span></code> (<code class="docutils literal notranslate"><span class="pre">-O3</span> <span class="pre">-march=native</span></code>) or <code class="docutils literal notranslate"><span class="pre">Debug</span></code> (<code class="docutils literal notranslate"><span class="pre">-g</span> <span class="pre">-Wall</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BUILD_PYTHON_BINDINGS</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">OFF</span></code></p></td>
+<td><p>Build the <code class="docutils literal notranslate"><span class="pre">disortpp</span></code> Python module via pybind11</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="building-with-python-bindings">
+<h2>Building with Python bindings<a class="headerlink" href="#building-with-python-bindings" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>DisORT
+mkdir<span class="w"> </span>build<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">cd</span><span class="w"> </span>build
+cmake<span class="w"> </span>..<span class="w"> </span>-DBUILD_PYTHON_BINDINGS<span class="o">=</span>ON<span class="w"> </span>-DCMAKE_BUILD_TYPE<span class="o">=</span>Release
+make<span class="w"> </span>-j<span class="k">$(</span>nproc<span class="k">)</span>
+</pre></div>
+</div>
+<p>This additionally produces the shared library
+<code class="docutils literal notranslate"><span class="pre">disortpp.cpython-3XX-x86_64-linux-gnu.so</span></code> (the exact filename depends on
+your Python version and platform).</p>
+<p>To use the module, either run Python from the <code class="docutils literal notranslate"><span class="pre">build/</span></code> directory or add
+it to <code class="docutils literal notranslate"><span class="pre">PYTHONPATH</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">PYTHONPATH</span><span class="o">=</span>/path/to/DisORT/build:<span class="nv">$PYTHONPATH</span>
+python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;import disortpp; print(&#39;OK&#39;)&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="running-the-tests">
+<h2>Running the tests<a class="headerlink" href="#running-the-tests" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>build
+ctest<span class="w"> </span>--output-on-failure
+</pre></div>
+</div>
+<p>Or run the test binary directly for verbose output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./tests/disortpp_tests
+</pre></div>
+</div>
+</section>
+<section id="using-disort-in-your-cmake-project">
+<h2>Using DisORT++ in your CMake project<a class="headerlink" href="#using-disort-in-your-cmake-project" title="Link to this heading"></a></h2>
+<p>Add DisORT++ as a subdirectory or use <code class="docutils literal notranslate"><span class="pre">FetchContent</span></code>:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">add_subdirectory</span><span class="p">(</span><span class="s">DisORT</span><span class="p">)</span>
+
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">main.cpp</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">my_app</span><span class="w"> </span><span class="s">PRIVATE</span><span class="w"> </span><span class="s">disortpp</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">disortpp</span></code> target transitively provides the Eigen include directories,
+so no additional <code class="docutils literal notranslate"><span class="pre">find_package(Eigen3)</span></code> call is needed.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="DisORT++ Documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="quickstart.html" class="btn btn-neutral float-right" title="Quick Start" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Kitzmann.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

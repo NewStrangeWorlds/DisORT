@@ -1,0 +1,206 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Search &mdash; DisORT++ 2.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+
+  
+    
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=179ab080"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="#" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            DisORT++
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="#" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#building-the-c-library">Building the C++ library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="installation.html#build-options">Build options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#building-with-python-bindings">Building with Python bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#using-disort-in-your-cmake-project">Using DisORT++ in your CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#c-quick-start">C++ quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#python-quick-start">Python quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="quickstart.html#workflow-overview">Workflow overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#choosing-a-solver">Choosing a solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="quickstart.html#level-and-layer-indexing">Level and layer indexing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#flux-only-calculation">Flux-only calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#full-intensity-calculation">Full intensity calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#fast-flux-solver">Fast flux solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#thermal-emission">Thermal emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#spectral-loop-thermal-emission-spectrum">Spectral loop (thermal emission spectrum)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#wavelength-dependent-scattering-python-loop">Wavelength-dependent scattering (Python loop)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#wavelength-dependent-scattering-spectral-overrides">Wavelength-dependent scattering (spectral overrides)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples.html#thermal-emission-with-spectral-overrides">Thermal emission with spectral overrides</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">C++ API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="cpp_api/index.html">C++ API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/types.html">Enumerations and Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#phasefunction">PhaseFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#boundaryconditiontype">BoundaryConditionType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#illuminationtype">IlluminationType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#brdftype">BrdfType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#messagetype">MessageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#verbositylevel">VerbosityLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/types.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/config.html">Configuration Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortflags">DisortFlags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#boundaryconditions">BoundaryConditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#brdf-specifications">BRDF specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortconfig">DisortConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/config.html#disortfluxconfig">DisortFluxConfig</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/solvers.html">Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/solvers.html#disortsolver">DisortSolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/solvers.html#disortfluxsolver-nstr">DisortFluxSolver&lt;NStr&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/results.html">Result Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/results.html#disortresult">DisortResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/results.html#fluxresult">FluxResult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="cpp_api/utilities.html">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#planck-function">Planck function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#phase-function-utilities">Phase function utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#legendre-polynomials">Legendre polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="cpp_api/utilities.html#linear-algebra">Linear algebra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="python_api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api/index.html#enumerations">Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api/index.html#contents">Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="python_api/config.html">Python Configuration Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/solvers.html">Python Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/results.html">Python Result Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="python_api/spectral.html">Spectral Loop Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">DisORT++</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Search</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <noscript>
+  <div id="fallback" class="admonition warning">
+    <p class="last">
+      Please activate JavaScript to enable the search functionality.
+    </p>
+  </div>
+  </noscript>
+
+  
+  <div id="search-results">
+  
+  </div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Kitzmann.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+  <script>
+    jQuery(function() { Search.loadIndex("searchindex.js"); });
+  </script>
+  
+  <script id="searchindexloader"></script>
+   
+
+
+</body>
+</html>

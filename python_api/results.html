@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Result Classes &mdash; DisORT++ 2.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=179ab080"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Spectral Loop Functions" href="spectral.html" />
+    <link rel="prev" title="Python Solvers" href="solvers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DisORT++
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-the-c-library">Building the C++ library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#build-options">Build options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-with-python-bindings">Building with Python bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#using-disort-in-your-cmake-project">Using DisORT++ in your CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#c-quick-start">C++ quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#python-quick-start">Python quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#workflow-overview">Workflow overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#choosing-a-solver">Choosing a solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#level-and-layer-indexing">Level and layer indexing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#flux-only-calculation">Flux-only calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#full-intensity-calculation">Full intensity calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#fast-flux-solver">Fast flux solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission">Thermal emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#spectral-loop-thermal-emission-spectrum">Spectral loop (thermal emission spectrum)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-python-loop">Wavelength-dependent scattering (Python loop)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-spectral-overrides">Wavelength-dependent scattering (spectral overrides)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission-with-spectral-overrides">Thermal emission with spectral overrides</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">C++ API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cpp_api/index.html">C++ API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/types.html">Enumerations and Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#phasefunction">PhaseFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#boundaryconditiontype">BoundaryConditionType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#illuminationtype">IlluminationType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#brdftype">BrdfType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#messagetype">MessageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#verbositylevel">VerbosityLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/config.html">Configuration Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortflags">DisortFlags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#boundaryconditions">BoundaryConditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#brdf-specifications">BRDF specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortconfig">DisortConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortfluxconfig">DisortFluxConfig</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/solvers.html">Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/solvers.html#disortsolver">DisortSolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/solvers.html#disortfluxsolver-nstr">DisortFluxSolver&lt;NStr&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/results.html">Result Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/results.html#disortresult">DisortResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/results.html#fluxresult">FluxResult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/utilities.html">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#planck-function">Planck function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#phase-function-utilities">Phase function utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#legendre-polynomials">Legendre polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#linear-algebra">Linear algebra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#enumerations">Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#contents">Contents</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="config.html">Python Configuration Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solvers.html">Python Solvers</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Python Result Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectral.html">Spectral Loop Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DisORT++</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Python API Reference</a></li>
+      <li class="breadcrumb-item active">Python Result Classes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/python_api/results.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="python-result-classes">
+<h1>Python Result Classes<a class="headerlink" href="#python-result-classes" title="Link to this heading"></a></h1>
+<nav class="contents local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#disortresult" id="id2">DisortResult</a></p></li>
+<li><p><a class="reference internal" href="#fluxresult" id="id3">FluxResult</a></p></li>
+</ul>
+</nav>
+<section id="disortresult">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">DisortResult</a><a class="headerlink" href="#disortresult" title="Link to this heading"></a></h2>
+<p>Returned by <code class="docutils literal notranslate"><span class="pre">DisortSolver.solve()</span></code>. Contains all computed radiant
+quantities.</p>
+<section id="flux-vectors">
+<h3>Flux vectors<a class="headerlink" href="#flux-vectors" title="Link to this heading"></a></h3>
+<p>All flux attributes are Python lists (convertible to NumPy arrays). Size
+is <code class="docutils literal notranslate"><span class="pre">num_user_tau</span></code> (or <code class="docutils literal notranslate"><span class="pre">num_layers</span> <span class="pre">+</span> <span class="pre">1</span></code> when <code class="docutils literal notranslate"><span class="pre">use_user_tau</span> <span class="pre">=</span> <span class="pre">False</span></code>).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32.0%" />
+<col style="width: 68.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flux_direct_beam</span></code></p></td>
+<td><p>Direct-beam flux.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flux_down</span></code></p></td>
+<td><p>Diffuse downward flux.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flux_up</span></code></p></td>
+<td><p>Diffuse upward flux.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flux_tau_divergence</span></code></p></td>
+<td><p>Flux divergence.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity</span></code></p></td>
+<td><p>Mean intensity (including direct beam).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_down</span></code></p></td>
+<td><p>Mean diffuse downward intensity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_up</span></code></p></td>
+<td><p>Mean diffuse upward intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_direct_beam</span></code></p></td>
+<td><p>Mean direct beam intensity.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="special-boundary-condition-mode">
+<h3>Special boundary condition mode<a class="headerlink" href="#special-boundary-condition-mode" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32.0%" />
+<col style="width: 68.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">albedo_medium</span></code></p></td>
+<td><p>Medium albedo at each user angle.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">transmissivity_medium</span></code></p></td>
+<td><p>Medium transmissivity at each user angle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">spherical_albedo</span></code></p></td>
+<td><p>Spherical albedo (scalar).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">spherical_transmissivity</span></code></p></td>
+<td><p>Spherical transmissivity (scalar).</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="intensity-arrays">
+<h3>Intensity arrays<a class="headerlink" href="#intensity-arrays" title="Link to this heading"></a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mu_angles</span></code></p></td>
+<td><p>Polar angle cosines for intensity output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">intensity</span></code></p></td>
+<td><p>3D nested list [tau][mu][phi].</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">intensity_azimuth_avg</span></code></p></td>
+<td><p>2D nested list [tau][mu].</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">intensity_fourier_expansion</span></code></p></td>
+<td><p>3D nested list [tau][mu][fourier term].</p></td>
+</tr>
+</tbody>
+</table>
+<p>Convert to NumPy for convenient indexing:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">intensity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">intensity</span><span class="p">)</span>
+<span class="c1"># intensity.shape == (num_user_tau, num_user_mu, num_phi)</span>
+
+<span class="n">flux_up</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">flux_up</span><span class="p">)</span>
+<span class="c1"># flux_up.shape == (num_user_tau,)</span>
+</pre></div>
+</div>
+</section>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="result.num_user_tau">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">num_user_tau</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#result.num_user_tau" title="Link to this definition"></a></dt>
+<dd><p>Number of output levels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.num_user_mu">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">num_user_mu</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#result.num_user_mu" title="Link to this definition"></a></dt>
+<dd><p>Number of output polar angles.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.num_phi">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">num_phi</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#result.num_phi" title="Link to this definition"></a></dt>
+<dd><p>Number of azimuthal angles.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.total_flux_down">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">total_flux_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#result.total_flux_down" title="Link to this definition"></a></dt>
+<dd><p>Total downward flux at output level <code class="docutils literal notranslate"><span class="pre">lu</span></code> (direct + diffuse).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.net_flux">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">net_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#result.net_flux" title="Link to this definition"></a></dt>
+<dd><p>Net flux at output level <code class="docutils literal notranslate"><span class="pre">lu</span></code> (downward positive).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.intensities">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">intensities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">j</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#result.intensities" title="Link to this definition"></a></dt>
+<dd><p>Access the 3D intensity at user angle <code class="docutils literal notranslate"><span class="pre">iu</span></code>, level <code class="docutils literal notranslate"><span class="pre">lu</span></code>, azimuth
+<code class="docutils literal notranslate"><span class="pre">j</span></code>. Indices are 0-based.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="result.intensities_azimuth_avg">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">intensities_azimuth_avg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lu</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#result.intensities_azimuth_avg" title="Link to this definition"></a></dt>
+<dd><p>Access the azimuthally-averaged intensity. Indices are 0-based.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="fluxresult">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">FluxResult</a><a class="headerlink" href="#fluxresult" title="Link to this heading"></a></h2>
+<p>Returned by <code class="docutils literal notranslate"><span class="pre">DisortFluxSolver.solve()</span></code>. Lightweight flux-only container.</p>
+<p>All vectors have size <code class="docutils literal notranslate"><span class="pre">num_layers</span> <span class="pre">+</span> <span class="pre">1</span></code> (index 0 = TOA, last = BOA).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32.0%" />
+<col style="width: 68.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flux_direct_beam</span></code></p></td>
+<td><p>Direct-beam flux at each level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flux_down</span></code></p></td>
+<td><p>Diffuse downward flux at each level.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flux_up</span></code></p></td>
+<td><p>Diffuse upward flux at each level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">flux_tau_divergence</span></code></p></td>
+<td><p>Flux divergence at each level.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity</span></code></p></td>
+<td><p>Mean intensity at each level.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_down</span></code></p></td>
+<td><p>Mean diffuse downward intensity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_up</span></code></p></td>
+<td><p>Mean diffuse upward intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">mean_intensity_direct_beam</span></code></p></td>
+<td><p>Mean direct beam intensity.</p></td>
+</tr>
+</tbody>
+</table>
+<section id="id1">
+<h3>Methods<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="py method">
+<dt class="sig sig-object py" id="result.num_levels">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">num_levels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#result.num_levels" title="Link to this definition"></a></dt>
+<dd><p>Number of output levels.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">total_flux_down</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lev</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Total downward flux at level <code class="docutils literal notranslate"><span class="pre">lev</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">result.</span></span><span class="sig-name descname"><span class="pre">net_flux</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lev</span></span></em><span class="sig-paren">)</span></dt>
+<dd><p>Net flux at level <code class="docutils literal notranslate"><span class="pre">lev</span></code>.</p>
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="solvers.html" class="btn btn-neutral float-left" title="Python Solvers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="spectral.html" class="btn btn-neutral float-right" title="Spectral Loop Functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Kitzmann.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

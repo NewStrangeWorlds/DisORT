@@ -1,0 +1,476 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python Configuration Classes &mdash; DisORT++ 2.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=179ab080"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Python Solvers" href="solvers.html" />
+    <link rel="prev" title="Python API Reference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DisORT++
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-the-c-library">Building the C++ library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#build-options">Build options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-with-python-bindings">Building with Python bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#using-disort-in-your-cmake-project">Using DisORT++ in your CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#c-quick-start">C++ quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#python-quick-start">Python quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#workflow-overview">Workflow overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#choosing-a-solver">Choosing a solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#level-and-layer-indexing">Level and layer indexing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#flux-only-calculation">Flux-only calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#full-intensity-calculation">Full intensity calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#fast-flux-solver">Fast flux solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission">Thermal emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#spectral-loop-thermal-emission-spectrum">Spectral loop (thermal emission spectrum)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-python-loop">Wavelength-dependent scattering (Python loop)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-spectral-overrides">Wavelength-dependent scattering (spectral overrides)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission-with-spectral-overrides">Thermal emission with spectral overrides</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">C++ API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../cpp_api/index.html">C++ API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/types.html">Enumerations and Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#phasefunction">PhaseFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#boundaryconditiontype">BoundaryConditionType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#illuminationtype">IlluminationType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#brdftype">BrdfType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#messagetype">MessageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#verbositylevel">VerbosityLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/types.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/config.html">Configuration Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortflags">DisortFlags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#boundaryconditions">BoundaryConditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#brdf-specifications">BRDF specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortconfig">DisortConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/config.html#disortfluxconfig">DisortFluxConfig</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/solvers.html">Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/solvers.html#disortsolver">DisortSolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/solvers.html#disortfluxsolver-nstr">DisortFluxSolver&lt;NStr&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/results.html">Result Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/results.html#disortresult">DisortResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/results.html#fluxresult">FluxResult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../cpp_api/utilities.html">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#planck-function">Planck function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#phase-function-utilities">Phase function utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#legendre-polynomials">Legendre polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../cpp_api/utilities.html#linear-algebra">Linear algebra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Python API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#enumerations">Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#contents">Contents</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Python Configuration Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="solvers.html">Python Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="results.html">Python Result Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="spectral.html">Spectral Loop Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DisORT++</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Python API Reference</a></li>
+      <li class="breadcrumb-item active">Python Configuration Classes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/python_api/config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="python-configuration-classes">
+<h1>Python Configuration Classes<a class="headerlink" href="#python-configuration-classes" title="Link to this heading"></a></h1>
+<nav class="contents local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#disortflags" id="id1">DisortFlags</a></p></li>
+<li><p><a class="reference internal" href="#boundaryconditions" id="id2">BoundaryConditions</a></p></li>
+<li><p><a class="reference internal" href="#brdf-specifications" id="id3">BRDF specifications</a></p></li>
+<li><p><a class="reference internal" href="#disortconfig" id="id4">DisortConfig</a></p></li>
+<li><p><a class="reference internal" href="#disortfluxconfig" id="id5">DisortFluxConfig</a></p></li>
+</ul>
+</nav>
+<section id="disortflags">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">DisortFlags</a><a class="headerlink" href="#disortflags" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">flags</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">DisortFlags</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>All members are read/write attributes:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 15.0%" />
+<col style="width: 55.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_user_tau</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Return output at user-specified optical depths.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_user_mu</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Return intensities at user-specified polar angles.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ibcnd</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BoundaryConditionType</span></code></p></td>
+<td><p>Boundary condition type (<code class="docutils literal notranslate"><span class="pre">General</span></code> or <code class="docutils literal notranslate"><span class="pre">Special</span></code>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_lambertian_surface</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Use Lambertian surface reflection.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Include thermal emission.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_spherical_beam</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Pseudo-spherical beam geometry.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">comp_only_fluxes</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Compute only fluxes (skip angular intensities).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">brdf_type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">BrdfType</span></code></p></td>
+<td><p>BRDF model for the surface.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">intensity_corr_buras</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Buras &amp; Emde intensity correction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">intensity_corr_nakajima</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Nakajima &amp; Tanaka intensity correction.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Use Delta-M+ scaling.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output_fourier_expansion</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Return Fourier expansion of intensity.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="boundaryconditions">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">BoundaryConditions</a><a class="headerlink" href="#boundaryconditions" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bc</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">BoundaryConditions</span><span class="p">()</span>
+</pre></div>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28.0%" />
+<col style="width: 12.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Attribute</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">direct_beam_flux</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Incident parallel beam intensity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">direct_beam_mu</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Cosine of beam polar angle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">direct_beam_phi</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Azimuth angle of beam [deg].</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">isotropic_flux_top</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Isotropic illumination at top.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">isotropic_flux_bottom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Isotropic illumination at bottom.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">temperature_top</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Top boundary temperature [K].</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">temperature_bottom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Bottom boundary temperature [K].</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">emissivity_top</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Top boundary emissivity.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">surface_albedo</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">float</span></code></p></td>
+<td><p>Lambertian surface albedo.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="brdf-specifications">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">BRDF specifications</a><a class="headerlink" href="#brdf-specifications" title="Link to this heading"></a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rpv</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">RpvBrdfSpec</span><span class="p">()</span>           <span class="c1"># rho0, k, theta, sigma, t1, t2, scale</span>
+<span class="n">ambrals</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">AmbralsBrdfSpec</span><span class="p">()</span>   <span class="c1"># iso, vol, geo</span>
+<span class="n">cox_munk</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">CoxMunkBrdfSpec</span><span class="p">()</span>  <span class="c1"># u10, pcl, xsal, refractive_index, do_shadow</span>
+<span class="n">hapke</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">HapkeBrdfSpec</span><span class="p">()</span>       <span class="c1"># b0, hh, w</span>
+
+<span class="n">brdf</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">BrdfSpecification</span><span class="p">()</span>
+<span class="n">brdf</span><span class="o">.</span><span class="n">set_rpv</span><span class="p">(</span><span class="n">rpv</span><span class="p">)</span>
+<span class="n">brdf</span><span class="o">.</span><span class="n">set_ambrals</span><span class="p">(</span><span class="n">ambrals</span><span class="p">)</span>
+<span class="n">brdf</span><span class="o">.</span><span class="n">set_cox_munk</span><span class="p">(</span><span class="n">cox_munk</span><span class="p">)</span>
+<span class="n">brdf</span><span class="o">.</span><span class="n">set_hapke</span><span class="p">(</span><span class="n">hapke</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All BRDF struct members are accessible as read/write attributes. See the
+<a class="reference internal" href="../cpp_api/config.html"><span class="doc">C++ BRDF documentation</span></a> for details on each
+parameter.</p>
+</section>
+<section id="disortconfig">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">DisortConfig</a><a class="headerlink" href="#disortconfig" title="Link to this heading"></a></h2>
+<p>Main configuration class for the general solver.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construct with dimensions</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">DisortConfig</span><span class="p">(</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">num_streams</span><span class="p">)</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">DisortConfig</span><span class="p">(</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">num_streams</span><span class="p">,</span> <span class="n">num_phase_func_moments</span><span class="p">)</span>
+
+<span class="c1"># Or default-construct and set dimensions manually</span>
+<span class="n">cfg</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">DisortConfig</span><span class="p">()</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">num_layers</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">cfg</span><span class="o">.</span><span class="n">num_streams</span> <span class="o">=</span> <span class="mi">16</span>
+</pre></div>
+</div>
+<p><strong>Nested structs</strong> (read/write):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">cfg.flags</span></code> – <code class="docutils literal notranslate"><span class="pre">DisortFlags</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cfg.bc</span></code> – <code class="docutils literal notranslate"><span class="pre">BoundaryConditions</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cfg.brdf</span></code> – <code class="docutils literal notranslate"><span class="pre">BrdfSpecification</span></code></p></li>
+</ul>
+<p><strong>Dimension attributes:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">num_layers</span></code>, <code class="docutils literal notranslate"><span class="pre">num_streams</span></code>, <code class="docutils literal notranslate"><span class="pre">num_phase_func_moments</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_user_tau</span></code>, <code class="docutils literal notranslate"><span class="pre">num_user_mu</span></code>, <code class="docutils literal notranslate"><span class="pre">num_phi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">num_phase_func_angles</span></code></p></li>
+</ul>
+<p><strong>Physical parameters:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">wavenumber_low</span></code>, <code class="docutils literal notranslate"><span class="pre">wavenumber_high</span></code> (<code class="docutils literal notranslate"><span class="pre">float</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accuracy_fourier_series</span></code> (<code class="docutils literal notranslate"><span class="pre">float</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bottom_radius</span></code> (<code class="docutils literal notranslate"><span class="pre">float</span></code>)</p></li>
+</ul>
+<p><strong>Array attributes</strong> (set as Python lists after calling <code class="docutils literal notranslate"><span class="pre">allocate()</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">delta_tau</span></code> – Layer optical depths.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">single_scat_albedo</span></code> – Layer single-scattering albedos.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phase_function_moments</span></code> – Nested list of Legendre moments.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">temperature</span></code> – Level temperatures.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">level_altitudes</span></code> – Level altitudes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tau_user</span></code> – User optical depths.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu_user</span></code> – User polar angle cosines.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phi_user</span></code> – User azimuthal angles [deg].</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mu_phase_function</span></code> – Scattering angle grid.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phase_function</span></code> – Tabulated phase function values.</p></li>
+</ul>
+<p><strong>Methods:</strong></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.nmom_nstr">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">nmom_nstr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cfg.nmom_nstr" title="Link to this definition"></a></dt>
+<dd><p>Returns <code class="docutils literal notranslate"><span class="pre">max(num_phase_func_moments,</span> <span class="pre">num_streams)</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.allocate">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">allocate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cfg.allocate" title="Link to this definition"></a></dt>
+<dd><p>Allocate internal arrays. Call after setting all dimensions and flags.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.validate">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#cfg.validate" title="Link to this definition"></a></dt>
+<dd><p>Validate the configuration. Raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> on invalid input.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_henyey_greenstein">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_henyey_greenstein</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_henyey_greenstein" title="Link to this definition"></a></dt>
+<dd><p>Fill Henyey-Greenstein phase function moments (<span class="math notranslate nohighlight">\(\chi_k = g^k\)</span>).
+Set <code class="docutils literal notranslate"><span class="pre">lc</span></code> to fill only a specific layer (0-based), or <code class="docutils literal notranslate"><span class="pre">-1</span></code> for all
+layers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_isotropic">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_isotropic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_isotropic" title="Link to this definition"></a></dt>
+<dd><p>Set isotropic scattering.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_rayleigh">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_rayleigh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_rayleigh" title="Link to this definition"></a></dt>
+<dd><p>Set Rayleigh scattering.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_haze_garcia_siewert">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_haze_garcia_siewert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_haze_garcia_siewert" title="Link to this definition"></a></dt>
+<dd><p>Set Haze-L phase function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_cloud_garcia_siewert">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_cloud_garcia_siewert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_cloud_garcia_siewert" title="Link to this definition"></a></dt>
+<dd><p>Set Cloud C.1 phase function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cfg.set_phase_function">
+<span class="sig-prename descclassname"><span class="pre">cfg.</span></span><span class="sig-name descname"><span class="pre">set_phase_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">g</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cfg.set_phase_function" title="Link to this definition"></a></dt>
+<dd><p>Set phase function by enum type.</p>
+</dd></dl>
+
+</section>
+<section id="disortfluxconfig">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">DisortFluxConfig</a><a class="headerlink" href="#disortfluxconfig" title="Link to this heading"></a></h2>
+<p>Lightweight configuration for the flux-only solver.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cfg</span> <span class="o">=</span> <span class="n">disortpp</span><span class="o">.</span><span class="n">DisortFluxConfig</span><span class="p">(</span><span class="n">num_layers</span><span class="p">,</span> <span class="n">num_streams</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>All fields are flat attributes (no nested structs):</p>
+<p><strong>Dimensions:</strong> <code class="docutils literal notranslate"><span class="pre">num_layers</span></code>, <code class="docutils literal notranslate"><span class="pre">num_streams</span></code>, <code class="docutils literal notranslate"><span class="pre">num_phase_func_moments</span></code></p>
+<p><strong>Flags:</strong> <code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span></code>, <code class="docutils literal notranslate"><span class="pre">use_spherical_beam</span></code>,
+<code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code></p>
+<p><strong>Boundary conditions:</strong> <code class="docutils literal notranslate"><span class="pre">direct_beam_flux</span></code>, <code class="docutils literal notranslate"><span class="pre">direct_beam_mu</span></code>,
+<code class="docutils literal notranslate"><span class="pre">isotropic_flux_top</span></code>, <code class="docutils literal notranslate"><span class="pre">isotropic_flux_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature_top</span></code>,
+<code class="docutils literal notranslate"><span class="pre">temperature_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">emissivity_top</span></code>, <code class="docutils literal notranslate"><span class="pre">surface_albedo</span></code></p>
+<p><strong>Physical parameters:</strong> <code class="docutils literal notranslate"><span class="pre">wavenumber_low</span></code>, <code class="docutils literal notranslate"><span class="pre">wavenumber_high</span></code>,
+<code class="docutils literal notranslate"><span class="pre">bottom_radius</span></code></p>
+<p><strong>Arrays:</strong> <code class="docutils literal notranslate"><span class="pre">delta_tau</span></code>, <code class="docutils literal notranslate"><span class="pre">single_scat_albedo</span></code>,
+<code class="docutils literal notranslate"><span class="pre">phase_function_moments</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature</span></code>, <code class="docutils literal notranslate"><span class="pre">level_altitudes</span></code></p>
+<p><strong>Methods:</strong> Same as <code class="docutils literal notranslate"><span class="pre">DisortConfig</span></code>: <code class="docutils literal notranslate"><span class="pre">nmom_nstr()</span></code>, <code class="docutils literal notranslate"><span class="pre">allocate()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">validate()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_henyey_greenstein()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_isotropic()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_rayleigh()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_haze_garcia_siewert()</span></code>,
+<code class="docutils literal notranslate"><span class="pre">set_cloud_garcia_siewert()</span></code>, <code class="docutils literal notranslate"><span class="pre">set_phase_function()</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Python API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="solvers.html" class="btn btn-neutral float-right" title="Python Solvers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Kitzmann.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

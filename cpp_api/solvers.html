@@ -1,0 +1,365 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solvers &mdash; DisORT++ 2.1.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=179ab080"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Result Classes" href="results.html" />
+    <link rel="prev" title="Configuration Classes" href="config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            DisORT++
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-the-c-library">Building the C++ library</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../installation.html#build-options">Build options</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#building-with-python-bindings">Building with Python bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#running-the-tests">Running the tests</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../installation.html#using-disort-in-your-cmake-project">Using DisORT++ in your CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Quick Start</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#c-quick-start">C++ quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#python-quick-start">Python quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../quickstart.html#workflow-overview">Workflow overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#choosing-a-solver">Choosing a solver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../quickstart.html#level-and-layer-indexing">Level and layer indexing</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#flux-only-calculation">Flux-only calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#full-intensity-calculation">Full intensity calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#fast-flux-solver">Fast flux solver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission">Thermal emission</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#spectral-loop-thermal-emission-spectrum">Spectral loop (thermal emission spectrum)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-python-loop">Wavelength-dependent scattering (Python loop)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#wavelength-dependent-scattering-spectral-overrides">Wavelength-dependent scattering (spectral overrides)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../examples.html#thermal-emission-with-spectral-overrides">Thermal emission with spectral overrides</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">C++ API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">C++ API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="types.html">Enumerations and Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="types.html#phasefunction">PhaseFunction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#boundaryconditiontype">BoundaryConditionType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#illuminationtype">IlluminationType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#brdftype">BrdfType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#messagetype">MessageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#verbositylevel">VerbosityLevel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="types.html#constants">Constants</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">Configuration Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="config.html#disortflags">DisortFlags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html#boundaryconditions">BoundaryConditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html#brdf-specifications">BRDF specifications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html#disortconfig">DisortConfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="config.html#disortfluxconfig">DisortFluxConfig</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Solvers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#disortsolver">DisortSolver</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#disortfluxsolver-nstr">DisortFluxSolver&lt;NStr&gt;</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="results.html">Result Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="results.html#disortresult">DisortResult</a></li>
+<li class="toctree-l3"><a class="reference internal" href="results.html#fluxresult">FluxResult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="utilities.html">Utility Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#planck-function">Planck function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#phase-function-utilities">Phase function utilities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#legendre-polynomials">Legendre polynomials</a></li>
+<li class="toctree-l3"><a class="reference internal" href="utilities.html#linear-algebra">Linear algebra</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Python API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../python_api/index.html">Python API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../python_api/index.html#enumerations">Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../python_api/index.html#contents">Contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../python_api/config.html">Python Configuration Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_api/solvers.html">Python Solvers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_api/results.html">Python Result Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../python_api/spectral.html">Spectral Loop Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">DisORT++</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">C++ API Reference</a></li>
+      <li class="breadcrumb-item active">Solvers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/cpp_api/solvers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="solvers">
+<h1>Solvers<a class="headerlink" href="#solvers" title="Link to this heading"></a></h1>
+<p>Defined in <code class="docutils literal notranslate"><span class="pre">DisortSolver.hpp</span></code> and <code class="docutils literal notranslate"><span class="pre">FluxSolver.hpp</span></code>.</p>
+<nav class="contents local" id="on-this-page">
+<p class="topic-title">On this page</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#disortsolver" id="id3">DisortSolver</a></p></li>
+<li><p><a class="reference internal" href="#disortfluxsolver-nstr" id="id4">DisortFluxSolver&lt;NStr&gt;</a></p></li>
+</ul>
+</nav>
+<section id="disortsolver">
+<h2><a class="toc-backref" href="#id3" role="doc-backlink">DisortSolver</a><a class="headerlink" href="#disortsolver" title="Link to this heading"></a></h2>
+<p>The general-purpose discrete ordinates radiative transfer solver. Supports
+full intensity calculations, user-specified output angles, BRDF surfaces,
+thermal emission, and intensity corrections.</p>
+<p>Defined in <code class="docutils literal notranslate"><span class="pre">DisortSolver.hpp</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">DisortSolver</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="n">DisortSolver</span><span class="p">();</span>
+<span class="w">    </span><span class="n">DisortResult</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="n">DisortConfig</span><span class="o">&amp;</span><span class="w"> </span><span class="n">config</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<section id="constructor">
+<h3>Constructor<a class="headerlink" href="#constructor" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="DisortSolver">
+<span class="sig-name descname"><span class="pre">DisortSolver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#DisortSolver" title="Link to this definition"></a></dt>
+<dd><p>Default constructor. The solver is lightweight and allocates memory
+only during <code class="docutils literal notranslate"><span class="pre">solve()</span></code>.</p>
+</dd></dl>
+
+</section>
+<section id="solve">
+<h3>solve<a class="headerlink" href="#solve" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">DisortResult</span> <span class="pre">solve(DisortConfig&amp;</span> <span class="pre">config)</span></span></dt>
+<dd><p>Solve the radiative transfer problem.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Input configuration. <strong>Note:</strong> the solver may modify
+the configuration to set automatic dimensions (e.g.,
+<code class="docutils literal notranslate"><span class="pre">num_phase_func_moments</span></code> when using a named phase function).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">DisortResult</span></code> containing fluxes, mean intensities, and
+(optionally) angular intensities.</p>
+</dd>
+<dt class="field-odd">Throws std::invalid_argument<span class="colon">:</span></dt>
+<dd class="field-odd"><p>if the configuration is invalid.</p>
+</dd>
+<dt class="field-even">Throws std::runtime_error<span class="colon">:</span></dt>
+<dd class="field-even"><p>if a numerical problem occurs.</p>
+</dd>
+</dl>
+<p>The solver internally performs:</p>
+<ol class="arabic simple">
+<li><p>Configuration validation and optional Delta-M(+) scaling.</p></li>
+<li><p>Eigenvalue/eigenvector computation for each layer.</p></li>
+<li><p>Boundary condition assembly and linear system solve.</p></li>
+<li><p>Flux and (optionally) intensity computation at all output levels.</p></li>
+</ol>
+<p>The solver object can be reused for multiple calls. Internal temporaries
+are re-allocated as needed.</p>
+</dd></dl>
+
+</section>
+</section>
+<section id="disortfluxsolver-nstr">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">DisortFluxSolver&lt;NStr&gt;</a><a class="headerlink" href="#disortfluxsolver-nstr" title="Link to this heading"></a></h2>
+<p>A performance-optimised flux-only solver with compile-time stream count.
+Uses fixed-size Eigen matrices for the eigenvalue problem, yielding
+30–50 % faster execution compared to <code class="docutils literal notranslate"><span class="pre">DisortSolver</span></code> in flux-only mode.</p>
+<p>Defined in <code class="docutils literal notranslate"><span class="pre">FluxSolver.hpp</span></code>.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">template</span><span class="o">&lt;</span><span class="kt">int</span><span class="w"> </span><span class="n">NStr</span><span class="o">&gt;</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DisortFluxSolver</span><span class="w"> </span><span class="p">{</span>
+<span class="k">public</span><span class="o">:</span>
+<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">NN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">NStr</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+
+<span class="w">    </span><span class="n">DisortFluxSolver</span><span class="p">();</span>
+<span class="w">    </span><span class="n">FluxResult</span><span class="w"> </span><span class="nf">solve</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">DisortFluxConfig</span><span class="o">&amp;</span><span class="w"> </span><span class="n">config</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+</div>
+<section id="template-parameter">
+<h3>Template parameter<a class="headerlink" href="#template-parameter" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">NStr</span></code> – the number of streams. Must be even and &gt;= 4. The following
+instantiations are provided:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;4&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;6&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;8&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;10&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;12&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;14&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;16&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;32&gt;</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DisortFluxSolver&lt;64&gt;</span></code></p></li>
+</ul>
+</section>
+<section id="id1">
+<h3>Constructor<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="DisortFluxSolver">
+<span class="sig-name descname"><span class="pre">DisortFluxSolver</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#DisortFluxSolver" title="Link to this definition"></a></dt>
+<dd><p>Default constructor. Lightweight; no allocation until <code class="docutils literal notranslate"><span class="pre">solve()</span></code> is
+called.</p>
+</dd></dl>
+
+</section>
+<section id="id2">
+<h3>solve<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FluxResult</span> <span class="pre">solve(const</span> <span class="pre">DisortFluxConfig&amp;</span> <span class="pre">config)</span></span></dt>
+<dd><p>Solve for fluxes and mean intensities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>config</strong> – Input configuration. Must have
+<code class="docutils literal notranslate"><span class="pre">config.num_streams</span> <span class="pre">==</span> <span class="pre">NStr</span></code>. The configuration is not modified
+(taken by const reference).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">FluxResult</span></code> with fluxes at all <code class="docutils literal notranslate"><span class="pre">num_layers</span> <span class="pre">+</span> <span class="pre">1</span></code> level
+boundaries.</p>
+</dd>
+<dt class="field-odd">Throws std::invalid_argument<span class="colon">:</span></dt>
+<dd class="field-odd"><p>if validation fails.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="limitations">
+<h3>Limitations<a class="headerlink" href="#limitations" title="Link to this heading"></a></h3>
+<p>Compared to <code class="docutils literal notranslate"><span class="pre">DisortSolver</span></code>, the flux solver does <strong>not</strong> support:</p>
+<ul class="simple">
+<li><p>Angular intensity output.</p></li>
+<li><p>User-specified output optical depths (output is always at all layer
+boundaries).</p></li>
+<li><p>BRDF surface models (Lambertian only).</p></li>
+<li><p>Intensity corrections (Nakajima-Tanaka, Buras-Emde).</p></li>
+<li><p>Special boundary condition mode.</p></li>
+</ul>
+</section>
+<section id="usage-example">
+<h3>Usage example<a class="headerlink" href="#usage-example" title="Link to this heading"></a></h3>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;DisortFluxConfig.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;FluxSolver.hpp&quot;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">disortpp</span><span class="p">;</span>
+
+<span class="n">DisortFluxConfig</span><span class="w"> </span><span class="nf">cfg</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="p">);</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">direct_beam_flux</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3.14159</span><span class="p">;</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">direct_beam_mu</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.5</span><span class="p">;</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">surface_albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.1</span><span class="p">;</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">allocate</span><span class="p">();</span>
+
+<span class="n">cfg</span><span class="p">.</span><span class="n">delta_tau</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="mf">5.0</span><span class="p">};</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">single_scat_albedo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9</span><span class="p">};</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">setHenyeyGreenstein</span><span class="p">(</span><span class="mf">0.8</span><span class="p">);</span>
+
+<span class="n">DisortFluxSolver</span><span class="o">&lt;</span><span class="mi">16</span><span class="o">&gt;</span><span class="w"> </span><span class="n">solver</span><span class="p">;</span>
+<span class="n">FluxResult</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">solver</span><span class="p">.</span><span class="n">solve</span><span class="p">(</span><span class="n">cfg</span><span class="p">);</span>
+
+<span class="kt">double</span><span class="w"> </span><span class="n">flux_up_toa</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">flux_up</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="config.html" class="btn btn-neutral float-left" title="Configuration Classes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="results.html" class="btn btn-neutral float-right" title="Result Classes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Kitzmann.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
