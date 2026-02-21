@@ -455,6 +455,7 @@ private:
 
   // Thermal emission working arrays (active when use_thermal_emission=true)
   double planck_bottom_ = 0.0;              // Planck function at bottom boundary
+  double planck_bottom_deriv_ = 0.0;         // dB/dτ at bottom boundary (diffusion BC)
   double planck_top_ = 0.0;              // Planck function at top boundary (× emissivity_top)
   std::vector<double> planck_intercept_;           // Planck linear intercept per layer (num_layers)
   std::vector<double> planck_slope_;           // Planck linear slope per layer (num_layers)

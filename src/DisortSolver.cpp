@@ -167,10 +167,20 @@ DisortResult DisortSolver::solve(DisortConfig& config)
 
   // Precompute Planck functions for thermal emission boundaries (mirrors C lines 692-702)
   planck_bottom_ = 0.0;
+  planck_bottom_deriv_ = 0.0;
   planck_top_ = 0.0;
   if (config.flags.use_thermal_emission) {
     planck_top_ = planckFunction2(config.wavenumber_low, config.wavenumber_high, config.bc.temperature_top) * config.bc.emissivity_top;
     planck_bottom_ = planckFunction2(config.wavenumber_low, config.wavenumber_high, config.bc.temperature_bottom);
+
+    // Compute dB/dτ at bottom for diffusion lower BC
+    if (config.flags.use_diffusion_lower_bc) {
+      double B_layer = planckFunction2(config.wavenumber_low, config.wavenumber_high, config.temperature[nlyr_ - 1]);
+      double dtau_last = scaled_dtau_[nlyr_ - 1];
+      if (dtau_last > 0.0) {
+        planck_bottom_deriv_ = (planck_bottom_ - B_layer) / dtau_last;
+      }
+    }
   }
 
   const bool do_user_intensities = !config.flags.comp_only_fluxes && config.flags.use_user_mu;
@@ -1229,8 +1239,9 @@ void DisortSolver::setMatrix(double kronecker_mode_0, bool lyrcut)
     // For BRDF: must compute per-jq. We always compute per-jq for generality.
     // C code: STWJ(20c), lines 3900-3904.
     for (int jq = nn; jq < nstr_; ++jq) {
-      if (lyrcut || (config_->flags.use_lambertian_surface && kronecker_mode_0 == 0.0)) {
-        // Lambertian surface + azimuth_mode>0, or truncated layer: no coupling
+      if (lyrcut || config_->flags.use_diffusion_lower_bc
+          || (config_->flags.use_lambertian_surface && kronecker_mode_0 == 0.0)) {
+        // No coupling: lyrcut, diffusion BC, or Lambertian + azimuth_mode>0
         band_matrix_(irow, nncol) = eigenvectors_[ncut - 1](jq, iq);
       } else {
         // Surface reflection coupling: C code BDR(jq-nn, k) → surface_refl_quad_(jq-nn_, k+1)
@@ -1252,8 +1263,9 @@ void DisortSolver::setMatrix(double kronecker_mode_0, bool lyrcut)
     int irow = nshift - jcol + nstr_ - 1;  // Convert to 0-based
     double expa = work_vec_(nstr_ - iq - 1);  // Use stored exponential from continuity loop
     for (int jq = nn; jq < nstr_; ++jq) {
-      if (lyrcut || (config_->flags.use_lambertian_surface && kronecker_mode_0 == 0.0)) {
-        // Lambertian + azimuth_mode>0, or truncated layer
+      if (lyrcut || config_->flags.use_diffusion_lower_bc
+          || (config_->flags.use_lambertian_surface && kronecker_mode_0 == 0.0)) {
+        // No coupling: lyrcut, diffusion BC, or Lambertian + azimuth_mode>0
         band_matrix_(irow, nncol) = eigenvectors_[ncut - 1](jq, iq) * expa;
       } else {
         // Surface reflection coupling using surface_refl_quad_
@@ -1698,10 +1710,40 @@ void DisortSolver::solve0(int azimuth_mode, double kronecker_mode_0)
     }
 
     // --- Bottom Boundary Condition ---
+    const int ncut = ncut_;  // Last layer (0-based)
+
+    if (config_->flags.use_diffusion_lower_bc) {
+      // Diffusion approximation: I_up(μ_i) = B(T_bottom) + μ_i × dB/dτ
+      for (int iq = 0; iq < nn_; ++iq) {
+        int idx = ncol - nn_ + iq;
+        double sum = 0.0;
+
+        // Beam particular solution at bottom
+        if (direct_beam_flux > 0.0) {
+          if (config_->flags.use_spherical_beam) {
+            sum -= std::exp(-beam_particular_atten_[ncut - 1] * scaled_tau_cumulative_[ncut])
+                 * (beam_particular_[ncut - 1](nn_ + iq)
+                  + beam_particular_slope_[ncut - 1](nn_ + iq) * scaled_tau_cumulative_[ncut]);
+          } else {
+            sum -= beam_particular_[ncut - 1](nn_ + iq) * beam_transmission_[ncut];
+          }
+        }
+
+        // Thermal particular solution at bottom
+        if (config_->flags.use_thermal_emission) {
+          sum -= thermal_particular_z0_[ncut - 1](nn_ + iq);
+          sum -= thermal_particular_z1_[ncut - 1](nn_ + iq) * scaled_tau_cumulative_[ncut];
+        }
+
+        // Diffusion source: B(T_bottom) + μ_i × dB/dτ
+        sum += planck_bottom_ + quad_angle_(iq) * planck_bottom_deriv_;
+
+        b(idx) = sum;
+      }
+    } else {
     // STWJ(20c): B = 2*sum + (BDR(0)*direct_beam_mu*direct_beam_flux/pi - ZZ(iq+nn))*expbea - ZPLK + isotropic_flux_bottom
     // where sum = Σ_jq CWT(jq)*CMU(jq)*surface_albedo*(ZZ(nn-1-jq)*expbea + thermal_particular_z0_+thermal_particular_z1_*tau)
     // BDR(iq,jq)=surface_albedo for Lambertian; BDR(iq,0)=surface_albedo; /pi only for direct beam
-    const int ncut = ncut_;  // Last layer (0-based)
     // Bottom boundary condition: STWJ(20c), C code lines 4494-4508.
     // Uses surface_refl_quad_(iq, jq+1) for diffuse, surface_refl_quad_(iq, 0) for direct beam, surface_emis_quad_(iq) for emission.
     // Both Lambertian and BRDF are handled via surface_refl_quad_/surface_emis_quad_ (filled by computeSurfaceBidir).
@@ -1764,6 +1806,7 @@ void DisortSolver::solve0(int azimuth_mode, double kronecker_mode_0)
 
       b(idx) = sum;
     }
+    } // end else (standard bottom BC)
 
     // --- Layer Interface Continuity ---
     for (int lc = 1; lc < ncut; ++lc) {
@@ -2801,11 +2844,20 @@ double DisortSolver::computeUserIntensities(int azimuth_mode, double kronecker_m
         bndint = (isotropic_flux_top + tplanck) * exp(scaled_tau_user_[lu] / mu_user);
 
       } else if (!negumu) {
-        if (lyrcut_ || (config_->flags.use_lambertian_surface && azimuth_mode > 0)) {
+        if (config_->flags.use_diffusion_lower_bc) {
+          if (lyrcut_ || azimuth_mode > 0) {
+            // No contribution: lyrcut or higher azimuthal modes (diffusion BC is azimuthally symmetric)
+            intensity_azim_mode_(iu, lu) = palint + plkint;
+            continue;
+          }
+          // Diffusion BC: I_up(μ_user) = B(T_bottom) + μ_user × dB/dτ
+          bndint = (planck_bottom_ + mu_user * planck_bottom_deriv_)
+               * exp((scaled_tau_user_[lu] - scaled_tau_cumulative_[nlyr_]) / mu_user);
+        } else if (lyrcut_ || (config_->flags.use_lambertian_surface && azimuth_mode > 0)) {
           // No bottom-boundary contribution (lyrcut or higher Lambertian modes)
           intensity_azim_mode_(iu, lu) = palint + plkint;
           continue;
-        }
+        } else {
 
         // Bottom-boundary Lambertian reflection contribution
         // Precompute exp(-kk_pos * dtau) for last layer
@@ -2855,6 +2907,7 @@ double DisortSolver::computeUserIntensities(int azimuth_mode, double kronecker_m
 
         bndint = (bnddfu + bnddir + kronecker_mode_0 * surface_emis_user_(iu) * bplanck + isotropic_flux_bottom)
              * exp((scaled_tau_user_[lu] - scaled_tau_cumulative_[nlyr_]) / mu_user);
+        } // end standard surface BC
       }
 
       intensity_azim_mode_(iu, lu) = palint + plkint + bndint + genint;

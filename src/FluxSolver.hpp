@@ -155,6 +155,7 @@ private:
   std::vector<double> planck_intercept_;   // [nlyr]
   std::vector<double> planck_slope_;       // [nlyr]
   double planck_bottom_ = 0.0;
+  double planck_bottom_deriv_ = 0.0;
   double planck_top_ = 0.0;
 
   // Band matrix and solution (depends on nlyr)

@@ -225,6 +225,7 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("intensity_corr_buras", &DisortFlags::intensity_corr_buras)
       .def_readwrite("intensity_corr_nakajima", &DisortFlags::intensity_corr_nakajima)
       .def_readwrite("use_delta_m_plus", &DisortFlags::use_delta_m_plus)
+      .def_readwrite("use_diffusion_lower_bc", &DisortFlags::use_diffusion_lower_bc)
       .def_readwrite("output_fourier_expansion", &DisortFlags::output_fourier_expansion);
 
   py::class_<BoundaryConditions>(m, "BoundaryConditions")
@@ -362,6 +363,7 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("use_thermal_emission", &DisortFluxConfig::use_thermal_emission)
       .def_readwrite("use_spherical_beam", &DisortFluxConfig::use_spherical_beam)
       .def_readwrite("use_delta_m_plus", &DisortFluxConfig::use_delta_m_plus)
+      .def_readwrite("use_diffusion_lower_bc", &DisortFluxConfig::use_diffusion_lower_bc)
 
       // Boundary conditions
       .def_readwrite("direct_beam_flux", &DisortFluxConfig::direct_beam_flux)

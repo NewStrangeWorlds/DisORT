@@ -92,12 +92,23 @@ FluxResult DisortFluxSolver<NStr>::solve(const DisortFluxConfig& config)
 
   // Precompute Planck functions for thermal emission boundaries
   planck_bottom_ = 0.0;
+  planck_bottom_deriv_ = 0.0;
   planck_top_ = 0.0;
   if (config.use_thermal_emission) {
     planck_top_ = planckFunction2(config.wavenumber_low, config.wavenumber_high,
                     config.temperature_top) * config.emissivity_top;
     planck_bottom_ = planckFunction2(config.wavenumber_low, config.wavenumber_high,
                       config.temperature_bottom);
+
+    // Compute dB/dτ at bottom for diffusion lower BC
+    if (config.use_diffusion_lower_bc) {
+      double B_layer = planckFunction2(config.wavenumber_low, config.wavenumber_high,
+                        config.temperature[nlyr_ - 1]);
+      double dtau_last = scaled_dtau_[nlyr_ - 1];
+      if (dtau_last > 0.0) {
+        planck_bottom_deriv_ = (planck_bottom_ - B_layer) / dtau_last;
+      }
+    }
   }
 
   // Only azimuth mode m=0 is needed for fluxes
@@ -827,7 +838,7 @@ void DisortFluxSolver<NStr>::setMatrix()
     nncol++;
     int irow = nshift - jcol + NStr - 1;
     for (int jq = NN; jq < NStr; ++jq) {
-      if (lyrcut_) {
+      if (lyrcut_ || config_->use_diffusion_lower_bc) {
         band_matrix_(irow, nncol) = eigenvectors_[ncut - 1](jq, iq);
       } else {
         // Lambertian + azimuth_mode=0: surface reflection coupling
@@ -851,7 +862,7 @@ void DisortFluxSolver<NStr>::setMatrix()
     // work_vec_(nstr_-iq-1) convention from the continuity loop.
     double expa = std::exp(eigenvalues_[ncut - 1](NStr - iq - 1) * scaled_dtau_[ncut - 1]);
     for (int jq = NN; jq < NStr; ++jq) {
-      if (lyrcut_) {
+      if (lyrcut_ || config_->use_diffusion_lower_bc) {
         band_matrix_(irow, nncol) = eigenvectors_[ncut - 1](jq, iq) * expa;
       } else {
         double refl_sum = 0.0;
@@ -899,6 +910,35 @@ void DisortFluxSolver<NStr>::solve0()
   }
 
   // --- Bottom Boundary Condition ---
+  if (config_->use_diffusion_lower_bc) {
+    // Diffusion approximation: I_up(μ_i) = B(T_bottom) + μ_i × dB/dτ
+    for (int iq = 0; iq < NN; ++iq) {
+      int idx = ncol - NN + iq;
+      double sum = 0.0;
+
+      // Beam particular solution at bottom
+      if (direct_beam_flux > 0.0) {
+        if (config_->use_spherical_beam) {
+          sum -= std::exp(-beam_particular_atten_[ncut - 1] * scaled_tau_cumulative_[ncut])
+               * (beam_particular_[ncut - 1](NN + iq)
+                + beam_particular_slope_[ncut - 1](NN + iq) * scaled_tau_cumulative_[ncut]);
+        } else {
+          sum -= beam_particular_[ncut - 1](NN + iq) * beam_transmission_[ncut];
+        }
+      }
+
+      // Thermal particular solution at bottom
+      if (config_->use_thermal_emission) {
+        sum -= thermal_z0_[ncut - 1](NN + iq);
+        sum -= thermal_z1_[ncut - 1](NN + iq) * scaled_tau_cumulative_[ncut];
+      }
+
+      // Diffusion source: B(T_bottom) + μ_i × dB/dτ
+      sum += planck_bottom_ + quad_angle_(iq) * planck_bottom_deriv_;
+
+      b(idx) = sum;
+    }
+  } else {
   for (int iq = 0; iq < NN; ++iq) {
     int idx = ncol - NN + iq;
     double sum = 0.0;
@@ -954,6 +994,7 @@ void DisortFluxSolver<NStr>::solve0()
 
     b(idx) = sum;
   }
+  } // end standard bottom BC
 
   // --- Layer Interface Continuity ---
   for (int lc = 1; lc < ncut; ++lc) {

@@ -26,6 +26,7 @@ public:
   bool use_thermal_emission = false;
   bool use_spherical_beam = false;
   bool use_delta_m_plus = false;
+  bool use_diffusion_lower_bc = false;
 
   // ======== Boundary conditions ========
   double direct_beam_flux = 0.0;

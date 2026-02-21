@@ -83,6 +83,13 @@ void DisortFluxConfig::validate() const
     }
   }
 
+  // Diffusion lower BC checks
+  if (use_diffusion_lower_bc) {
+    if (!use_thermal_emission) {
+      throw std::invalid_argument("use_diffusion_lower_bc requires use_thermal_emission = true");
+    }
+  }
+
   // Boundary conditions
   if (direct_beam_flux < 0.0) {
     throw std::invalid_argument("direct_beam_flux must be >= 0");

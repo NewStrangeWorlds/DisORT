@@ -136,6 +136,16 @@ void DisortConfig::validate() const
     }
   }
 
+  // Diffusion lower BC checks
+  if (flags.use_diffusion_lower_bc) {
+    if (!flags.use_thermal_emission) {
+      throw std::invalid_argument("use_diffusion_lower_bc requires use_thermal_emission = true");
+    }
+    if (!flags.use_lambertian_surface) {
+      throw std::invalid_argument("use_diffusion_lower_bc requires use_lambertian_surface = true (BRDF is incompatible)");
+    }
+  }
+
   // Boundary condition checks
   if (bc.direct_beam_flux < 0.0) {
     throw std::invalid_argument("direct_beam_flux must be non-negative");
