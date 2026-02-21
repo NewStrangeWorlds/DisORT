@@ -210,6 +210,7 @@
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">intensity_corr_buras</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">intensity_corr_nakajima</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_delta_m_plus</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_diffusion_lower_bc</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">output_fourier_expansion</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -281,7 +282,18 @@ the Lambertian surface.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
 <td><p>Use Delta-M+ scaling (Lin et al. 2018) instead of standard Delta-M.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output_fourier_expansion</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_diffusion_lower_bc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>Use the diffusion approximation as the lower boundary condition.
+Designed for stellar atmospheres where there is no surface.
+The upward intensity at the bottom boundary is set to
+<span class="math notranslate nohighlight">\(I(\mu) = B(T_\mathrm{bottom}) + \mu\,\mathrm{d}B/\mathrm{d}\tau\)</span>,
+where <span class="math notranslate nohighlight">\(\mathrm{d}B/\mathrm{d}\tau\)</span> is estimated from the
+temperature gradient in the deepest layer.
+Requires <code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span> <span class="pre">=</span> <span class="pre">true</span></code> and
+<code class="docutils literal notranslate"><span class="pre">use_lambertian_surface</span> <span class="pre">=</span> <span class="pre">true</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output_fourier_expansion</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
 <td><p>Return the Fourier expansion of the intensity as a separate output
 in <code class="docutils literal notranslate"><span class="pre">intensity_fourier_expansion</span></code>.</p></td>
@@ -664,6 +676,8 @@ parameter of <code class="docutils literal notranslate"><span class="pre">Disort
 <li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_thermal_emission</span></code> – Include thermal emission (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_spherical_beam</span></code> – Pseudo-spherical beam geometry (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_delta_m_plus</span></code> – Delta-M+ scaling (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_diffusion_lower_bc</span></code> – Use diffusion approximation for the lower
+boundary condition (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>). See <code class="docutils literal notranslate"><span class="pre">DisortFlags</span></code> for details.</p></li>
 </ul>
 <p><strong>Boundary conditions:</strong></p>
 <ul class="simple">

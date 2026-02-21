@@ -234,7 +234,14 @@
 <td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
 <td><p>Use Delta-M+ scaling.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">output_fourier_expansion</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_diffusion_lower_bc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>Use the diffusion approximation as the lower boundary condition
+(for stellar atmospheres). Sets
+<span class="math notranslate nohighlight">\(I(\mu) = B(T_\mathrm{bottom}) + \mu\,\mathrm{d}B/\mathrm{d}\tau\)</span>.
+Requires <code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span> <span class="pre">=</span> <span class="pre">True</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output_fourier_expansion</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
 <td><p>Return Fourier expansion of intensity.</p></td>
 </tr>
@@ -427,7 +434,7 @@ layers.</p>
 <p>All fields are flat attributes (no nested structs):</p>
 <p><strong>Dimensions:</strong> <code class="docutils literal notranslate"><span class="pre">num_layers</span></code>, <code class="docutils literal notranslate"><span class="pre">num_streams</span></code>, <code class="docutils literal notranslate"><span class="pre">num_phase_func_moments</span></code></p>
 <p><strong>Flags:</strong> <code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span></code>, <code class="docutils literal notranslate"><span class="pre">use_spherical_beam</span></code>,
-<code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">use_diffusion_lower_bc</span></code></p>
 <p><strong>Boundary conditions:</strong> <code class="docutils literal notranslate"><span class="pre">direct_beam_flux</span></code>, <code class="docutils literal notranslate"><span class="pre">direct_beam_mu</span></code>,
 <code class="docutils literal notranslate"><span class="pre">isotropic_flux_top</span></code>, <code class="docutils literal notranslate"><span class="pre">isotropic_flux_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature_top</span></code>,
 <code class="docutils literal notranslate"><span class="pre">temperature_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">emissivity_top</span></code>, <code class="docutils literal notranslate"><span class="pre">surface_albedo</span></code></p>
