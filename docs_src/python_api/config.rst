@@ -55,6 +55,12 @@ All members are read/write attributes:
    * - ``use_delta_m_plus``
      - ``bool``
      - Use Delta-M+ scaling.
+   * - ``use_diffusion_lower_bc``
+     - ``bool``
+     - Use the diffusion approximation as the lower boundary condition
+       (for stellar atmospheres). Sets
+       :math:`I(\mu) = B(T_\mathrm{bottom}) + \mu\,\mathrm{d}B/\mathrm{d}\tau`.
+       Requires ``use_thermal_emission = True``.
    * - ``output_fourier_expansion``
      - ``bool``
      - Return Fourier expansion of intensity.
@@ -226,7 +232,7 @@ All fields are flat attributes (no nested structs):
 **Dimensions:** ``num_layers``, ``num_streams``, ``num_phase_func_moments``
 
 **Flags:** ``use_thermal_emission``, ``use_spherical_beam``,
-``use_delta_m_plus``
+``use_delta_m_plus``, ``use_diffusion_lower_bc``
 
 **Boundary conditions:** ``direct_beam_flux``, ``direct_beam_mu``,
 ``isotropic_flux_top``, ``isotropic_flux_bottom``, ``temperature_top``,

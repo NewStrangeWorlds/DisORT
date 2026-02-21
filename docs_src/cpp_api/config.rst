@@ -27,6 +27,7 @@ Control flags for the general solver.
        bool intensity_corr_buras      = false;
        bool intensity_corr_nakajima   = false;
        bool use_delta_m_plus          = false;
+       bool use_diffusion_lower_bc    = false;
        bool output_fourier_expansion  = false;
    };
 
@@ -80,6 +81,16 @@ Control flags for the general solver.
    * - ``use_delta_m_plus``
      - ``false``
      - Use Delta-M+ scaling (Lin et al. 2018) instead of standard Delta-M.
+   * - ``use_diffusion_lower_bc``
+     - ``false``
+     - Use the diffusion approximation as the lower boundary condition.
+       Designed for stellar atmospheres where there is no surface.
+       The upward intensity at the bottom boundary is set to
+       :math:`I(\mu) = B(T_\mathrm{bottom}) + \mu\,\mathrm{d}B/\mathrm{d}\tau`,
+       where :math:`\mathrm{d}B/\mathrm{d}\tau` is estimated from the
+       temperature gradient in the deepest layer.
+       Requires ``use_thermal_emission = true`` and
+       ``use_lambertian_surface = true``.
    * - ``output_fourier_expansion``
      - ``false``
      - Return the Fourier expansion of the intensity as a separate output
@@ -422,6 +433,8 @@ Members
 - ``bool use_thermal_emission`` -- Include thermal emission (default: ``false``).
 - ``bool use_spherical_beam`` -- Pseudo-spherical beam geometry (default: ``false``).
 - ``bool use_delta_m_plus`` -- Delta-M+ scaling (default: ``false``).
+- ``bool use_diffusion_lower_bc`` -- Use diffusion approximation for the lower
+  boundary condition (default: ``false``). See ``DisortFlags`` for details.
 
 **Boundary conditions:**
 
