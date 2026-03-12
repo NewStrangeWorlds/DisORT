@@ -245,6 +245,12 @@ Requires <code class="docutils literal notranslate"><span class="pre">use_therma
 <td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
 <td><p>Return Fourier expansion of intensity.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">index_from_bottom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">bool</span></code></p></td>
+<td><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, user arrays are indexed from BOA (index 0) to TOA.
+By default, arrays are indexed from TOA to BOA. When enabled,
+input and output arrays are automatically reversed by the solver.</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -434,7 +440,7 @@ layers.</p>
 <p>All fields are flat attributes (no nested structs):</p>
 <p><strong>Dimensions:</strong> <code class="docutils literal notranslate"><span class="pre">num_layers</span></code>, <code class="docutils literal notranslate"><span class="pre">num_streams</span></code>, <code class="docutils literal notranslate"><span class="pre">num_phase_func_moments</span></code></p>
 <p><strong>Flags:</strong> <code class="docutils literal notranslate"><span class="pre">use_thermal_emission</span></code>, <code class="docutils literal notranslate"><span class="pre">use_spherical_beam</span></code>,
-<code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">use_diffusion_lower_bc</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">use_delta_m_plus</span></code>, <code class="docutils literal notranslate"><span class="pre">use_diffusion_lower_bc</span></code>, <code class="docutils literal notranslate"><span class="pre">index_from_bottom</span></code></p>
 <p><strong>Boundary conditions:</strong> <code class="docutils literal notranslate"><span class="pre">direct_beam_flux</span></code>, <code class="docutils literal notranslate"><span class="pre">direct_beam_mu</span></code>,
 <code class="docutils literal notranslate"><span class="pre">isotropic_flux_top</span></code>, <code class="docutils literal notranslate"><span class="pre">isotropic_flux_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">temperature_top</span></code>,
 <code class="docutils literal notranslate"><span class="pre">temperature_bottom</span></code>, <code class="docutils literal notranslate"><span class="pre">emissivity_top</span></code>, <code class="docutils literal notranslate"><span class="pre">surface_albedo</span></code></p>

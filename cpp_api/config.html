@@ -212,6 +212,7 @@
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_delta_m_plus</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">use_diffusion_lower_bc</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">output_fourier_expansion</span><span class="w">  </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">index_from_bottom</span><span class="w">         </span><span class="o">=</span><span class="w"> </span><span class="nb">false</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 </div>
@@ -297,6 +298,17 @@ Requires <code class="docutils literal notranslate"><span class="pre">use_therma
 <td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
 <td><p>Return the Fourier expansion of the intensity as a separate output
 in <code class="docutils literal notranslate"><span class="pre">intensity_fourier_expansion</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">index_from_bottom</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">false</span></code></p></td>
+<td><p>If <code class="docutils literal notranslate"><span class="pre">true</span></code>, user arrays are indexed from the bottom of the
+atmosphere (BOA, index 0) to the top (TOA). By default (<code class="docutils literal notranslate"><span class="pre">false</span></code>),
+arrays are indexed from TOA (index 0) to BOA. When enabled, all
+input arrays (optical depths, single-scattering albedos, phase
+function moments, temperatures, altitudes, and user optical depths)
+are automatically reversed before the computation, and all output
+arrays (fluxes, mean intensities, and angular intensities) are
+reversed back after the computation.</p></td>
 </tr>
 </tbody>
 </table>
@@ -678,6 +690,8 @@ parameter of <code class="docutils literal notranslate"><span class="pre">Disort
 <li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_delta_m_plus</span></code> – Delta-M+ scaling (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">use_diffusion_lower_bc</span></code> – Use diffusion approximation for the lower
 boundary condition (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>). See <code class="docutils literal notranslate"><span class="pre">DisortFlags</span></code> for details.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">bool</span> <span class="pre">index_from_bottom</span></code> – Index user arrays from BOA (index 0) to TOA
+(default: <code class="docutils literal notranslate"><span class="pre">false</span></code>). See <code class="docutils literal notranslate"><span class="pre">DisortFlags</span></code> for details.</p></li>
 </ul>
 <p><strong>Boundary conditions:</strong></p>
 <ul class="simple">

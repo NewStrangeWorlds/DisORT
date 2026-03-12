@@ -64,6 +64,11 @@ All members are read/write attributes:
    * - ``output_fourier_expansion``
      - ``bool``
      - Return Fourier expansion of intensity.
+   * - ``index_from_bottom``
+     - ``bool``
+     - If ``True``, user arrays are indexed from BOA (index 0) to TOA.
+       By default, arrays are indexed from TOA to BOA. When enabled,
+       input and output arrays are automatically reversed by the solver.
 
 
 BoundaryConditions
@@ -232,7 +237,7 @@ All fields are flat attributes (no nested structs):
 **Dimensions:** ``num_layers``, ``num_streams``, ``num_phase_func_moments``
 
 **Flags:** ``use_thermal_emission``, ``use_spherical_beam``,
-``use_delta_m_plus``, ``use_diffusion_lower_bc``
+``use_delta_m_plus``, ``use_diffusion_lower_bc``, ``index_from_bottom``
 
 **Boundary conditions:** ``direct_beam_flux``, ``direct_beam_mu``,
 ``isotropic_flux_top``, ``isotropic_flux_bottom``, ``temperature_top``,
