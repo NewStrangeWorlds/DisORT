@@ -29,6 +29,7 @@ Control flags for the general solver.
        bool use_delta_m_plus          = false;
        bool use_diffusion_lower_bc    = false;
        bool output_fourier_expansion  = false;
+       bool index_from_bottom         = false;
    };
 
 .. list-table::
@@ -95,6 +96,16 @@ Control flags for the general solver.
      - ``false``
      - Return the Fourier expansion of the intensity as a separate output
        in ``intensity_fourier_expansion``.
+   * - ``index_from_bottom``
+     - ``false``
+     - If ``true``, user arrays are indexed from the bottom of the
+       atmosphere (BOA, index 0) to the top (TOA). By default (``false``),
+       arrays are indexed from TOA (index 0) to BOA. When enabled, all
+       input arrays (optical depths, single-scattering albedos, phase
+       function moments, temperatures, altitudes, and user optical depths)
+       are automatically reversed before the computation, and all output
+       arrays (fluxes, mean intensities, and angular intensities) are
+       reversed back after the computation.
 
 
 BoundaryConditions
@@ -435,6 +446,8 @@ Members
 - ``bool use_delta_m_plus`` -- Delta-M+ scaling (default: ``false``).
 - ``bool use_diffusion_lower_bc`` -- Use diffusion approximation for the lower
   boundary condition (default: ``false``). See ``DisortFlags`` for details.
+- ``bool index_from_bottom`` -- Index user arrays from BOA (index 0) to TOA
+  (default: ``false``). See ``DisortFlags`` for details.
 
 **Boundary conditions:**
 
