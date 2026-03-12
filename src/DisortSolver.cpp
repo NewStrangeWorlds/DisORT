@@ -1,5 +1,6 @@
 #include "DisortSolver.hpp"
 #include "BandSolver.hpp"
+#include "IndexConversion.hpp"
 #include "Planck.hpp"
 #include <cmath>
 #include <stdexcept>
@@ -25,6 +26,12 @@ DisortResult DisortSolver::solve(DisortConfig& config)
   // Auto-allocate arrays if the caller skipped allocate()
   if (config.delta_tau.empty()) {
     config.allocate();
+  }
+
+  // Reverse input arrays if user indexes from bottom
+  const bool reverse_index = config.flags.index_from_bottom;
+  if (reverse_index) {
+    reverseInputArrays(config);
   }
 
   // Validate configuration
@@ -162,6 +169,10 @@ DisortResult DisortSolver::solve(DisortConfig& config)
   // ========================================================================
   if (is_special_bc) {
     computeAlbTrans(config, result);
+    if (reverse_index) {
+      reverseOutputArrays(result);
+      reverseInputArrays(config);
+    }
     return result;
   }
 
@@ -375,6 +386,11 @@ DisortResult DisortSolver::solve(DisortConfig& config)
       && !config.flags.use_lambertian_surface && !config.flags.comp_only_fluxes
       && config.flags.use_user_mu && config.bc.direct_beam_flux > 0.0) {
     applyBrdfIntensityCorrection(result);
+  }
+
+  if (reverse_index) {
+    reverseOutputArrays(result);
+    reverseInputArrays(config);
   }
 
   return result;

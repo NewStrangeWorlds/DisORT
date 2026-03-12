@@ -1,5 +1,6 @@
 #include "FluxSolver.hpp"
 #include "BandSolver.hpp"
+#include "IndexConversion.hpp"
 #include "Planck.hpp"
 #include <cmath>
 #include <stdexcept>
@@ -19,8 +20,17 @@ static double chapmanImpl(int lc, double tau_frac,
 // ============================================================================
 
 template<int NStr>
-FluxResult DisortFluxSolver<NStr>::solve(const DisortFluxConfig& config)
+FluxResult DisortFluxSolver<NStr>::solve(const DisortFluxConfig& config_in)
 {
+  // If index_from_bottom, work on a reversed local copy
+  const bool reverse_index = config_in.index_from_bottom;
+  DisortFluxConfig local_config;
+  if (reverse_index) {
+    local_config = config_in;
+    reverseInputArrays(local_config);
+  }
+  const DisortFluxConfig& config = reverse_index ? local_config : config_in;
+
   config_ = &config;
 
   config.validate();
@@ -149,6 +159,10 @@ FluxResult DisortFluxSolver<NStr>::solve(const DisortFluxConfig& config)
 
   // Compute fluxes at all layer boundaries
   computeFluxes(result_);
+
+  if (reverse_index) {
+    reverseOutputArrays(result_);
+  }
 
   return result_;
 }

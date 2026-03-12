@@ -25,6 +25,7 @@ struct DisortFlags {
   bool use_delta_m_plus = false; ///< Use Delta-M+ scaling (Lin et al. 2018) instead of standard Delta-M
   bool use_diffusion_lower_bc = false; ///< Use diffusion approximation for lower BC (stellar atmospheres)
   bool output_fourier_expansion = false; ///< Return intensity_fourier_expansion as separate output
+  bool index_from_bottom = false; ///< If true, user arrays are indexed from BOA (index 0) to TOA
 };
 
 /**
