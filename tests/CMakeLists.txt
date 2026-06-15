@@ -7,6 +7,7 @@ add_executable(disortpp_tests
     test_linear_algebra.cpp
     test_solver.cpp
     test_flux_solver.cpp
+    test_jacobian.cpp
 )
 
 target_include_directories(disortpp_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

@@ -71,6 +71,7 @@ private:
   void setMatrix();
   void solve0();
   void computeFluxes(FluxResult& result);
+  void computeThermalJacobian(FluxResult& result);
   void allocateWorkingArrays();
 
   // ========================================================================
@@ -157,6 +158,16 @@ private:
   double planck_bottom_ = 0.0;
   double planck_bottom_deriv_ = 0.0;
   double planck_top_ = 0.0;
+
+  // Temperature-Jacobian working arrays (filled only when compute_temperature_jacobian).
+  // Derivatives of the thermal particular solution w.r.t. the bounding level
+  // Planck functions pkag[lc] (top, "_pt") and pkag[lc+1] (bottom, "_pb").
+  std::vector<FullVec> dthermal_z0_dpt_, dthermal_z0_dpb_;  // [nlyr]
+  std::vector<FullVec> dthermal_z1_dpt_, dthermal_z1_dpb_;  // [nlyr]
+  std::vector<double>  dintercept_dpt_, dintercept_dpb_;    // [nlyr]
+  std::vector<double>  dslope_dpt_, dslope_dpb_;            // [nlyr]
+  Eigen::VectorXd jac_b_;   // RHS-derivative / back-substitution scratch (NStr*nlyr)
+  Eigen::VectorXd jac_LL_;  // derivative of integration_constants_ (NStr*nlyr)
 
   // Band matrix and solution (depends on nlyr)
   Eigen::MatrixXd band_matrix_;            // (9*NN-2) x (NStr*nlyr)

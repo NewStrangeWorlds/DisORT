@@ -168,4 +168,49 @@ double planckFunction2(double wnumlo, double wnumhi, double temp)
   return planckFunction(wnumlo, wnumhi, temp);
 }
 
+double planckFunctionDeriv2(double wnumlo, double wnumhi, double temp)
+{
+  // Validate inputs (mirrors planckFunction2)
+  if (temp < 0.0 || wnumhi < wnumlo || wnumlo < 0.0) {
+    throw std::invalid_argument(
+      "planckFunctionDeriv2: Invalid arguments (temp=" + std::to_string(temp) +
+      ", wnumlo=" + std::to_string(wnumlo) +
+      ", wnumhi=" + std::to_string(wnumhi) + ")");
+  }
+
+  if (temp < 1.e-4) {
+    return 0.0;
+  }
+
+  // Stable Planck shape function f(v) = v^3 / (e^v - 1), valid for all v >= 0.
+  auto fkernel = [](double v) -> double {
+    if (v < 1.e-6) return v * v;            // limit v^3/(e^v - 1) -> v^2 as v->0
+    const double em = std::exp(-v);
+    return v * v * v * em / (1.0 - em);     // = v^3/(e^v - 1), overflow-safe
+  };
+
+  // Single-wavenumber (spectral) case: b = c1 wvn^3 / (e^x - 1), x = C2 wvn/T.
+  // db/dT = b * (x/T) / (1 - e^{-x}).
+  if (wnumhi == wnumlo) {
+    const double wvn = wnumhi;
+    const double x = C2 * wvn / temp;
+    const double em = std::exp(-x);
+    const double b = planck_data.c1 * wvn * wvn * wvn * em / (1.0 - em);
+    return b * (x / temp) / (1.0 - em);
+  }
+
+  // Band-integrated case. With B = (sigma/pi)(15/pi^4) T^4 I, I = integral_{v0}^{v1} f,
+  //   dB/dT = 4 B / T  -  (sigma/pi)(15/pi^4) T^3 (v1 f(v1) - v0 f(v0)).
+  const double sigdpi = SIGMA / M_PI;
+  const double conc = 15.0 / std::pow(M_PI, 4.0);
+  const double v0 = C2 * wnumlo / temp;
+  const double v1 = C2 * wnumhi / temp;
+
+  const double B = planckFunction2(wnumlo, wnumhi, temp);
+  const double boundary = sigdpi * conc * temp * temp * temp
+                          * (v1 * fkernel(v1) - v0 * fkernel(v0));
+
+  return 4.0 * B / temp - boundary;
+}
+
 } // namespace disortpp

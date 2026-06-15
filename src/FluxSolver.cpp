@@ -160,6 +160,9 @@ FluxResult DisortFluxSolver<NStr>::solve(const DisortFluxConfig& config_in)
   // Compute fluxes at all layer boundaries
   computeFluxes(result_);
 
+  // Analytic temperature Jacobians (reuses the live band LU from solve0())
+  computeThermalJacobian(result_);
+
   if (reverse_index) {
     reverseOutputArrays(result_);
   }
@@ -213,6 +216,24 @@ void DisortFluxSolver<NStr>::allocateWorkingArrays()
   // Thermal expansion coefficients
   planck_intercept_.assign(nlyr_, 0.0);
   planck_slope_.assign(nlyr_, 0.0);
+
+  // Temperature-Jacobian working arrays
+  dthermal_z0_dpt_.resize(nlyr_);
+  dthermal_z0_dpb_.resize(nlyr_);
+  dthermal_z1_dpt_.resize(nlyr_);
+  dthermal_z1_dpb_.resize(nlyr_);
+  for (int lc = 0; lc < nlyr_; ++lc) {
+    dthermal_z0_dpt_[lc].setZero();
+    dthermal_z0_dpb_[lc].setZero();
+    dthermal_z1_dpt_[lc].setZero();
+    dthermal_z1_dpb_[lc].setZero();
+  }
+  dintercept_dpt_.assign(nlyr_, 0.0);
+  dintercept_dpb_.assign(nlyr_, 0.0);
+  dslope_dpt_.assign(nlyr_, 0.0);
+  dslope_dpb_.assign(nlyr_, 0.0);
+  jac_b_.resize(NStr * nlyr_);
+  jac_LL_.resize(NStr * nlyr_);
 
   // Band matrix
   const int mi9m2 = 9 * NN - 2;
@@ -761,6 +782,51 @@ void DisortFluxSolver<NStr>::computeIsotropicSource()
       thermal_z1_[lc](NN + iq) = isot_z1_(iq);
       thermal_z1_[lc](NN - iq - 1) = isot_z1_(iq + NN);
     }
+
+    // --- Temperature-Jacobian: derivatives of the thermal source w.r.t. the two
+    //     bounding level Planck functions pkag[lc] (top) and pkag[lc+1] (bottom),
+    //     reusing the live per-layer factorization lu. (Spurr & Christi 2019, 3.3)
+    if (config_->compute_temperature_jacobian) {
+      const double omm  = 1.0 - scaled_ssa_[lc];
+      const double tauc = scaled_tau_cumulative_[lc];
+
+      double dxr1_dpt = 0.0, dxr1_dpb = 0.0;
+      if (scaled_dtau_[lc] > 1e-4) {
+        dxr1_dpt = -1.0 / scaled_dtau_[lc];
+        dxr1_dpb =  1.0 / scaled_dtau_[lc];
+      }
+      const double dxr0_dpt = 1.0 - dxr1_dpt * tauc;
+      const double dxr0_dpb =      - dxr1_dpb * tauc;
+
+      dslope_dpt_[lc]     = dxr1_dpt;
+      dslope_dpb_[lc]     = dxr1_dpb;
+      dintercept_dpt_[lc] = dxr0_dpt;
+      dintercept_dpb_[lc] = dxr0_dpb;
+
+      // d/d(pkag[lc]) : [I-C] dZ1 = omm*dxr1,  [I-C] dZ0 = omm*dxr0 + mu.*dZ1
+      isot_b_.setConstant(omm * dxr1_dpt);
+      const FullVec dz1_pt = lu.solve(isot_b_);
+      isot_b_.array() = omm * dxr0_dpt + quad_angle_.array() * dz1_pt.array();
+      const FullVec dz0_pt = lu.solve(isot_b_);
+
+      // d/d(pkag[lc+1])
+      isot_b_.setConstant(omm * dxr1_dpb);
+      const FullVec dz1_pb = lu.solve(isot_b_);
+      isot_b_.array() = omm * dxr0_dpb + quad_angle_.array() * dz1_pb.array();
+      const FullVec dz0_pb = lu.solve(isot_b_);
+
+      for (int iq = 0; iq < NN; ++iq) {
+        dthermal_z0_dpt_[lc](NN + iq)     = dz0_pt(iq);
+        dthermal_z0_dpt_[lc](NN - iq - 1) = dz0_pt(iq + NN);
+        dthermal_z0_dpb_[lc](NN + iq)     = dz0_pb(iq);
+        dthermal_z0_dpb_[lc](NN - iq - 1) = dz0_pb(iq + NN);
+
+        dthermal_z1_dpt_[lc](NN + iq)     = dz1_pt(iq);
+        dthermal_z1_dpt_[lc](NN - iq - 1) = dz1_pt(iq + NN);
+        dthermal_z1_dpb_[lc](NN + iq)     = dz1_pb(iq);
+        dthermal_z1_dpb_[lc](NN - iq - 1) = dz1_pb(iq + NN);
+      }
+    }
   }
 }
 
@@ -1217,6 +1283,216 @@ void DisortFluxSolver<NStr>::computeFluxes(FluxResult& result)
 
     // Advance unscaled cumulative optical depth for next level
     if (lu < nlyr_) tauc_lu += config_->delta_tau[lu];
+  }
+}
+
+// ============================================================================
+// Temperature Jacobian (analytic dF/dT for thermal emission)
+// ============================================================================
+
+template<int NStr>
+void DisortFluxSolver<NStr>::computeThermalJacobian(FluxResult& result)
+{
+  // Analytic temperature Jacobians of fluxes / mean intensities (thermal source).
+  // Mirrors DisortSolver::computeThermalJacobian: dC = A^{-1} dB reuses the band
+  // LU factored in-place by solve0(). See Spurr & Christi (2019), Sect. 3.3.
+  if (!config_->compute_temperature_jacobian || !config_->use_thermal_emission) {
+    result.flux_up_temperature_jac.clear();
+    result.flux_down_temperature_jac.clear();
+    result.mean_intensity_temperature_jac.clear();
+    result.mean_intensity_down_temperature_jac.clear();
+    result.mean_intensity_up_temperature_jac.clear();
+    result.flux_divergence_temperature_jac.clear();
+    return;
+  }
+
+  const int ncol = NStr * ncut_;
+  const int ncd  = 3 * NN - 1;
+  const int lda  = band_matrix_.rows();
+  const int ncut = ncut_;
+
+  const int ndof     = nlyr_ + 2;     // level Planck 0..nlyr + surface column
+  const int surf_col = nlyr_ + 1;
+
+  auto alloc_jac = [&](std::vector<std::vector<double>>& J) {
+    J.assign(nlyr_ + 1, std::vector<double>(ndof, 0.0));
+  };
+  alloc_jac(result.flux_up_temperature_jac);
+  alloc_jac(result.flux_down_temperature_jac);
+  alloc_jac(result.mean_intensity_temperature_jac);
+  alloc_jac(result.mean_intensity_down_temperature_jac);
+  alloc_jac(result.mean_intensity_up_temperature_jac);
+  alloc_jac(result.flux_divergence_temperature_jac);
+
+  const double wlo = config_->wavenumber_low;
+  const double whi = config_->wavenumber_high;
+
+  auto dz0 = [&](int lc, int iq, int k) -> double {
+    double r = 0.0;
+    if (k == lc)     r += dthermal_z0_dpt_[lc](iq);
+    if (k == lc + 1) r += dthermal_z0_dpb_[lc](iq);
+    return r;
+  };
+  auto dz1 = [&](int lc, int iq, int k) -> double {
+    double r = 0.0;
+    if (k == lc)     r += dthermal_z1_dpt_[lc](iq);
+    if (k == lc + 1) r += dthermal_z1_dpb_[lc](iq);
+    return r;
+  };
+  auto dIntc = [&](int lc, int k) -> double {
+    double r = 0.0;
+    if (k == lc)     r += dintercept_dpt_[lc];
+    if (k == lc + 1) r += dintercept_dpb_[lc];
+    return r;
+  };
+  auto dSlp = [&](int lc, int k) -> double {
+    double r = 0.0;
+    if (k == lc)     r += dslope_dpt_[lc];
+    if (k == lc + 1) r += dslope_dpb_[lc];
+    return r;
+  };
+
+  const bool diffusion_bc = config_->use_diffusion_lower_bc;
+  const double dtau_last  = scaled_dtau_[nlyr_ - 1];
+  const double tauc_bot   = scaled_tau_cumulative_[ncut];
+
+  auto reorder_to_LL = [&]() {
+    jac_LL_.setZero();
+    for (int lc = 0; lc < ncut; ++lc) {
+      const int ipnt = (lc + 1) * NStr - NN - 1;
+      for (int iq = 0; iq < NN; ++iq) {
+        const int ll_idx = lc * NStr + (NN - iq - 1);
+        const int b_idx  = ipnt - iq;
+        if (b_idx >= 0 && b_idx < ncol && ll_idx < jac_LL_.size()) jac_LL_(ll_idx) = jac_b_(b_idx);
+      }
+      for (int iq = 0; iq < NN; ++iq) {
+        const int ll_idx = lc * NStr + (NN + iq);
+        const int b_idx  = ipnt + iq + 1;
+        if (b_idx >= 0 && b_idx < ncol && ll_idx < jac_LL_.size()) jac_LL_(ll_idx) = jac_b_(b_idx);
+      }
+    }
+  };
+
+  auto propagate = [&](int k, int col, double chain) {
+    for (int lu = 0; lu <= nlyr_; ++lu) {
+      int lyu = (lu == 0) ? 0 : lu - 1;
+      if (lyrcut_ && lyu > ncut_ - 1) continue;
+      if (lyu >= ncut_) lyu = ncut_ - 1;
+      const double utaupr  = scaled_tau_cumulative_[lu];
+      const int    ll_off  = lyu * NStr;
+      const double tau_bot = scaled_tau_cumulative_[lyu + 1];
+      const double tau_top = scaled_tau_cumulative_[lyu];
+
+      FullVec dexp;
+      for (int jq = 0; jq < NN; ++jq)
+        dexp(jq) = jac_LL_(jq + ll_off) * std::exp(-eigenvalues_[lyu](jq) * (utaupr - tau_bot));
+      for (int jq = NN; jq < NStr; ++jq)
+        dexp(jq) = jac_LL_(jq + ll_off) * std::exp(-eigenvalues_[lyu](jq) * (utaupr - tau_top));
+      FullVec dval = eigenvectors_[lyu] * dexp;
+
+      if (k >= 0) {
+        for (int iq = 0; iq < NStr; ++iq)
+          dval(iq) += dz0(lyu, iq, k) + dz1(lyu, iq, k) * utaupr;
+      }
+
+      double dMI = 0.0, dMI_dn = 0.0, dMI_up = 0.0, dfldn = 0.0, dfup = 0.0;
+      for (int iq = 0; iq < NN; ++iq) {
+        const int c = NN - iq - 1;
+        const double v = dval(iq), w = quad_weight_(c);
+        dMI += w * v; dMI_dn += w * v; dfldn += w * v * quad_angle_(c);
+      }
+      for (int iq = NN; iq < NStr; ++iq) {
+        const int c = iq - NN;
+        const double v = dval(iq), w = quad_weight_(c);
+        dMI += w * v; dMI_up += w * v; dfup += w * v * quad_angle_(c);
+      }
+      dfup  *= 2.0 * M_PI;
+      dfldn *= 2.0 * M_PI;
+
+      const double dflux_down = dfldn;
+      const double dMI_total  = (2.0 * M_PI * dMI)    / (4.0 * M_PI);
+      const double dMI_down   = (2.0 * M_PI * dMI_dn) / (4.0 * M_PI);
+      const double dMI_up_    = (2.0 * M_PI * dMI_up) / (4.0 * M_PI);
+
+      double dpls = 0.0;
+      if (k >= 0) dpls = dIntc(lyu, k) + dSlp(lyu, k) * utaupr;
+      const double dfdiv =
+        (1.0 - config_->single_scat_albedo[lyu]) * 4.0 * M_PI * (dMI_total - dpls);
+
+      result.flux_up_temperature_jac[lu][col]             = chain * dfup;
+      result.flux_down_temperature_jac[lu][col]           = chain * dflux_down;
+      result.mean_intensity_temperature_jac[lu][col]      = chain * dMI_total;
+      result.mean_intensity_down_temperature_jac[lu][col] = chain * dMI_down;
+      result.mean_intensity_up_temperature_jac[lu][col]   = chain * dMI_up_;
+      result.flux_divergence_temperature_jac[lu][col]     = chain * dfdiv;
+    }
+  };
+
+  // ---- Level-temperature DOFs: k = 0 .. nlyr_ ----
+  for (int k = 0; k <= nlyr_; ++k) {
+    jac_b_.head(ncol).setZero();
+
+    for (int iq = 0; iq < NN; ++iq)
+      jac_b_(iq) = -dz0(0, NN - 1 - iq, k);
+
+    if (diffusion_bc) {
+      for (int iq = 0; iq < NN; ++iq) {
+        const int idx = ncol - NN + iq;
+        double s = -dz0(ncut - 1, NN + iq, k) - dz1(ncut - 1, NN + iq, k) * tauc_bot;
+        if (k == nlyr_ - 1 && dtau_last > 0.0) s += quad_angle_(iq) * (-1.0 / dtau_last);
+        jac_b_(idx) = s;
+      }
+    } else {
+      for (int iq = 0; iq < NN; ++iq) {
+        const int idx = ncol - NN + iq;
+        double s = 0.0;
+        if (!lyrcut_) {
+          double refl = 0.0;
+          for (int jq = 0; jq < NN; ++jq) {
+            const double ps = dz0(ncut - 1, NN - 1 - jq, k)
+                            + dz1(ncut - 1, NN - 1 - jq, k) * tauc_bot;
+            refl += quad_weight_(jq) * quad_angle_(jq) * surface_refl_quad_(iq, jq + 1) * ps;
+          }
+          s += 2.0 * refl;
+        }
+        s -= dz0(ncut - 1, NN + iq, k) + dz1(ncut - 1, NN + iq, k) * tauc_bot;
+        jac_b_(idx) = s;
+      }
+    }
+
+    for (int lc = 1; lc < ncut; ++lc) {
+      const int ipnt = lc * NStr - NN;
+      const double tauc = scaled_tau_cumulative_[lc];
+      for (int iq = 0; iq < NStr; ++iq) {
+        jac_b_(ipnt + iq) = dz0(lc, iq, k) - dz0(lc - 1, iq, k)
+                          + (dz1(lc, iq, k) - dz1(lc - 1, iq, k)) * tauc;
+      }
+    }
+
+    detail::bandSolve(band_matrix_.data(), lda, ncol, ncd, ncd, band_pivot_.data(), jac_b_.data());
+    reorder_to_LL();
+    propagate(k, k, planckFunctionDeriv2(wlo, whi, config_->temperature[k]));
+  }
+
+  // ---- Surface DOF ----
+  {
+    jac_b_.head(ncol).setZero();
+    if (diffusion_bc) {
+      for (int iq = 0; iq < NN; ++iq) {
+        const int idx = ncol - NN + iq;
+        double s = 1.0;
+        if (dtau_last > 0.0) s += quad_angle_(iq) * (1.0 / dtau_last);
+        jac_b_(idx) = s;
+      }
+    } else {
+      for (int iq = 0; iq < NN; ++iq) {
+        const int idx = ncol - NN + iq;
+        jac_b_(idx) = surface_emis_quad_(iq);
+      }
+    }
+    detail::bandSolve(band_matrix_.data(), lda, ncol, ncd, ncd, band_pivot_.data(), jac_b_.data());
+    reorder_to_LL();
+    propagate(-1, surf_col, planckFunctionDeriv2(wlo, whi, config_->temperature_bottom));
   }
 }
 

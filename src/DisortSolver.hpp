@@ -246,6 +246,20 @@ private:
   void computeFluxes(DisortResult& result);
 
   /**
+   * @brief Compute analytic temperature Jacobians of fluxes and mean intensities
+   *
+   * Linearizes the thermal (Planck) source and the boundary-value problem with
+   * respect to the level Planck functions (LIDORT-style, Spurr & Christi 2019
+   * Sect. 3.3) and chains with dB/dT to obtain dF/dT. Only valid for the m=0
+   * azimuth mode (thermal source is azimuth-independent) and must be called while
+   * the band LU factorization from solve0() is still live. Fills the
+   * *_temperature_jac arrays in @p result.
+   *
+   * @param result Reference to result structure where Jacobians will be stored
+   */
+  void computeThermalJacobian(DisortResult& result);
+
+  /**
    * @brief Interpolate eigenvectors to user angles
    *
    * Converts c_interp_eigenvec() from original code.
@@ -459,6 +473,18 @@ private:
   double planck_top_ = 0.0;              // Planck function at top boundary (× emissivity_top)
   std::vector<double> planck_intercept_;           // Planck linear intercept per layer (num_layers)
   std::vector<double> planck_slope_;           // Planck linear slope per layer (num_layers)
+
+  // Temperature-Jacobian working arrays (active when compute_temperature_jacobian).
+  // Per-layer derivatives of the thermal particular solution w.r.t. the bounding
+  // level Planck functions pkag[lc] (top, "_pt") and pkag[lc+1] (bottom, "_pb").
+  LayerVectors dthermal_z0_dpt_;   // d(thermal_particular_z0_[lc])/d(pkag[lc])    : nstr × (nlyr+1)
+  LayerVectors dthermal_z0_dpb_;   // d(thermal_particular_z0_[lc])/d(pkag[lc+1])  : nstr × (nlyr+1)
+  LayerVectors dthermal_z1_dpt_;   // d(thermal_particular_z1_[lc])/d(pkag[lc])    : nstr × (nlyr+1)
+  LayerVectors dthermal_z1_dpb_;   // d(thermal_particular_z1_[lc])/d(pkag[lc+1])  : nstr × (nlyr+1)
+  std::vector<double> dintercept_dpt_, dintercept_dpb_; // d(planck_intercept_[lc])/d(pkag[lc], pkag[lc+1])
+  std::vector<double> dslope_dpt_, dslope_dpb_;         // d(planck_slope_[lc])/d(pkag[lc], pkag[lc+1])
+  Eigen::VectorXd jac_b_;          // RHS-derivative / back-substitution scratch (nstr*nlyr)
+  Eigen::VectorXd jac_LL_;         // derivative of integration_constants_ (nstr*nlyr)
 
   // User-angle intensity working arrays (contiguous storage, active when !comp_only_fluxes && use_user_mu)
   LayerMatrices eigenvec_user_;          // Eigenvectors at user angles: numu × nstr×nlyr contiguous

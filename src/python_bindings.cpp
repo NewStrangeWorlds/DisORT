@@ -17,6 +17,34 @@ namespace py = pybind11;
 using namespace disortpp;
 
 // ============================================================================
+// Safe exposure of config vector fields
+// ----------------------------------------------------------------------------
+// pybind11's def_readwrite copies a std::vector to/from a Python list, so an
+// in-place element assignment such as `cfg.temperature[i] = x` silently mutates
+// a throwaway copy and is lost. These macros expose a vector field as a
+// def_property whose getter returns an IMMUTABLE tuple — so accidental element
+// assignment raises `TypeError` immediately instead of failing silently — while
+// whole-sequence assignment (`cfg.temperature = [...]`, the documented idiom)
+// keeps working through the setter. Reading, iteration and np.array() are
+// unaffected (a tuple is array-like).
+// ============================================================================
+#define RO_VEC1D(cls, field)                                                   \
+  def_property(                                                                \
+      #field,                                                                  \
+      [](const cls& c) { return py::tuple(py::cast(c.field)); },               \
+      [](cls& c, const std::vector<double>& v) { c.field = v; })
+
+#define RO_VEC2D(cls, field)                                                   \
+  def_property(                                                                \
+      #field,                                                                  \
+      [](const cls& c) {                                                       \
+        py::list outer;                                                        \
+        for (const auto& row : c.field) outer.append(py::tuple(py::cast(row)));\
+        return py::tuple(outer);                                               \
+      },                                                                       \
+      [](cls& c, const std::vector<std::vector<double>>& v) { c.field = v; })
+
+// ============================================================================
 // Per-wavelength overrides for spectral loop functions
 // ============================================================================
 
@@ -227,7 +255,8 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("use_delta_m_plus", &DisortFlags::use_delta_m_plus)
       .def_readwrite("use_diffusion_lower_bc", &DisortFlags::use_diffusion_lower_bc)
       .def_readwrite("output_fourier_expansion", &DisortFlags::output_fourier_expansion)
-      .def_readwrite("index_from_bottom", &DisortFlags::index_from_bottom);
+      .def_readwrite("index_from_bottom", &DisortFlags::index_from_bottom)
+      .def_readwrite("compute_temperature_jacobian", &DisortFlags::compute_temperature_jacobian);
 
   py::class_<BoundaryConditions>(m, "BoundaryConditions")
       .def(py::init<>())
@@ -312,21 +341,21 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("accuracy_fourier_series", &DisortConfig::accuracy_fourier_series)
       .def_readwrite("bottom_radius", &DisortConfig::bottom_radius)
 
-      // Layer/level arrays
-      .def_readwrite("delta_tau", &DisortConfig::delta_tau)
-      .def_readwrite("single_scat_albedo", &DisortConfig::single_scat_albedo)
-      .def_readwrite("phase_function_moments", &DisortConfig::phase_function_moments)
-      .def_readwrite("temperature", &DisortConfig::temperature)
-      .def_readwrite("level_altitudes", &DisortConfig::level_altitudes)
+      // Layer/level arrays (immutable-tuple getter; assign whole sequences)
+      .RO_VEC1D(DisortConfig, delta_tau)
+      .RO_VEC1D(DisortConfig, single_scat_albedo)
+      .RO_VEC2D(DisortConfig, phase_function_moments)
+      .RO_VEC1D(DisortConfig, temperature)
+      .RO_VEC1D(DisortConfig, level_altitudes)
 
       // User output specification
-      .def_readwrite("tau_user", &DisortConfig::tau_user)
-      .def_readwrite("mu_user", &DisortConfig::mu_user)
-      .def_readwrite("phi_user", &DisortConfig::phi_user)
+      .RO_VEC1D(DisortConfig, tau_user)
+      .RO_VEC1D(DisortConfig, mu_user)
+      .RO_VEC1D(DisortConfig, phi_user)
 
       // Phase function specification
-      .def_readwrite("mu_phase_function", &DisortConfig::mu_phase_function)
-      .def_readwrite("phase_function", &DisortConfig::phase_function)
+      .RO_VEC1D(DisortConfig, mu_phase_function)
+      .RO_VEC2D(DisortConfig, phase_function)
 
       // Methods
       .def("nmom_nstr", &DisortConfig::nmomNstr)
@@ -366,6 +395,7 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("use_delta_m_plus", &DisortFluxConfig::use_delta_m_plus)
       .def_readwrite("use_diffusion_lower_bc", &DisortFluxConfig::use_diffusion_lower_bc)
       .def_readwrite("index_from_bottom", &DisortFluxConfig::index_from_bottom)
+      .def_readwrite("compute_temperature_jacobian", &DisortFluxConfig::compute_temperature_jacobian)
 
       // Boundary conditions
       .def_readwrite("direct_beam_flux", &DisortFluxConfig::direct_beam_flux)
@@ -382,12 +412,12 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("wavenumber_high", &DisortFluxConfig::wavenumber_high)
       .def_readwrite("bottom_radius", &DisortFluxConfig::bottom_radius)
 
-      // Layer/level arrays
-      .def_readwrite("delta_tau", &DisortFluxConfig::delta_tau)
-      .def_readwrite("single_scat_albedo", &DisortFluxConfig::single_scat_albedo)
-      .def_readwrite("phase_function_moments", &DisortFluxConfig::phase_function_moments)
-      .def_readwrite("temperature", &DisortFluxConfig::temperature)
-      .def_readwrite("level_altitudes", &DisortFluxConfig::level_altitudes)
+      // Layer/level arrays (immutable-tuple getter; assign whole sequences)
+      .RO_VEC1D(DisortFluxConfig, delta_tau)
+      .RO_VEC1D(DisortFluxConfig, single_scat_albedo)
+      .RO_VEC2D(DisortFluxConfig, phase_function_moments)
+      .RO_VEC1D(DisortFluxConfig, temperature)
+      .RO_VEC1D(DisortFluxConfig, level_altitudes)
 
       // Methods
       .def("nmom_nstr", &DisortFluxConfig::nmomNstr)
@@ -429,6 +459,16 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("spherical_albedo", &DisortResult::spherical_albedo)
       .def_readwrite("spherical_transmissivity", &DisortResult::spherical_transmissivity)
 
+      // Temperature Jacobians (filled when flags.compute_temperature_jacobian);
+      // each is [num_user_tau][num_layers+2]: columns 0..num_layers are level
+      // temperatures, column num_layers+1 is the surface temperature.
+      .def_readwrite("flux_up_temperature_jac", &DisortResult::flux_up_temperature_jac)
+      .def_readwrite("flux_down_temperature_jac", &DisortResult::flux_down_temperature_jac)
+      .def_readwrite("mean_intensity_temperature_jac", &DisortResult::mean_intensity_temperature_jac)
+      .def_readwrite("mean_intensity_down_temperature_jac", &DisortResult::mean_intensity_down_temperature_jac)
+      .def_readwrite("mean_intensity_up_temperature_jac", &DisortResult::mean_intensity_up_temperature_jac)
+      .def_readwrite("flux_divergence_temperature_jac", &DisortResult::flux_divergence_temperature_jac)
+
       // Angle information
       .def_readwrite("mu_angles", &DisortResult::mu_angles)
 
@@ -464,6 +504,13 @@ PYBIND11_MODULE(disortpp, m) {
       .def_readwrite("mean_intensity_down", &FluxResult::mean_intensity_down)
       .def_readwrite("mean_intensity_up", &FluxResult::mean_intensity_up)
       .def_readwrite("mean_intensity_direct_beam", &FluxResult::mean_intensity_direct_beam)
+      // Temperature Jacobians ([num_layers+1][num_layers+2]; columns: levels 0..N, surface N+1)
+      .def_readwrite("flux_up_temperature_jac", &FluxResult::flux_up_temperature_jac)
+      .def_readwrite("flux_down_temperature_jac", &FluxResult::flux_down_temperature_jac)
+      .def_readwrite("mean_intensity_temperature_jac", &FluxResult::mean_intensity_temperature_jac)
+      .def_readwrite("mean_intensity_down_temperature_jac", &FluxResult::mean_intensity_down_temperature_jac)
+      .def_readwrite("mean_intensity_up_temperature_jac", &FluxResult::mean_intensity_up_temperature_jac)
+      .def_readwrite("flux_divergence_temperature_jac", &FluxResult::flux_divergence_temperature_jac)
       .def("num_levels", &FluxResult::num_levels)
       .def("total_flux_down", &FluxResult::totalFluxDown, py::arg("lev"))
       .def("net_flux", &FluxResult::netFlux, py::arg("lev"));
@@ -715,3 +762,6 @@ PYBIND11_MODULE(disortpp, m) {
       "Dispatches to DisortFluxSolver based on config.num_streams. "
       "Returns a list of FluxResult.");
 }
+
+#undef RO_VEC1D
+#undef RO_VEC2D

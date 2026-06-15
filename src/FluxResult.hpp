@@ -21,6 +21,19 @@ struct FluxResult {
   std::vector<double> mean_intensity_up;           ///< Mean diffuse upward intensity [num_layers+1]
   std::vector<double> mean_intensity_direct_beam;  ///< Mean direct beam intensity [num_layers+1]
 
+  // Temperature Jacobians (filled only when compute_temperature_jacobian).
+  // Each is [num_layers+1][num_layers+2]: columns 0..num_layers are the level
+  // temperatures, column num_layers+1 is the surface temperature. Ordering
+  // follows index_from_bottom (both the level rows and the level-temperature
+  // columns are reversed when it is set; the surface column stays last).
+  // Empty when not requested.
+  std::vector<std::vector<double>> flux_up_temperature_jac;          ///< d(flux_up)/dT
+  std::vector<std::vector<double>> flux_down_temperature_jac;        ///< d(flux_down)/dT
+  std::vector<std::vector<double>> mean_intensity_temperature_jac;       ///< d(mean_intensity)/dT
+  std::vector<std::vector<double>> mean_intensity_down_temperature_jac;  ///< d(mean_intensity_down)/dT
+  std::vector<std::vector<double>> mean_intensity_up_temperature_jac;    ///< d(mean_intensity_up)/dT
+  std::vector<std::vector<double>> flux_divergence_temperature_jac;  ///< d(flux_tau_divergence)/dT (heating-rate Jacobian)
+
   /// Number of output levels
   int num_levels() const { return static_cast<int>(flux_up.size()); }
 

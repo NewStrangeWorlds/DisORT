@@ -43,6 +43,23 @@ public:
   // Intensity expansion coefficients (if output_fourier_expansion = true, 0-based)
   std::vector<std::vector<std::vector<double>>> intensity_fourier_expansion;  ///< Intensity [num_user_tau][num_user_mu][num_streams+1]
 
+  // ------------------------------------------------------------------------
+  // Temperature Jacobians (only filled when flags.compute_temperature_jacobian
+  // and flags.use_thermal_emission). Each is [num_user_tau][num_layers+2]:
+  //   column k = 0..num_layers : d(output)/d(temperature at level k)   [K^-1 * units]
+  //   column num_layers+1      : d(output)/d(bc.temperature_bottom)    (surface)
+  // Empty when the Jacobian is not requested. Ordering follows flags.index_from_bottom:
+  // by default the level (row) and level-temperature (column) axes run top-of-atmosphere
+  // -> bottom; when index_from_bottom is set both are reversed to match the user's
+  // bottom-up indexing (the surface column always stays last).
+  // ------------------------------------------------------------------------
+  std::vector<std::vector<double>> flux_up_temperature_jac;          ///< d(flux_up)/dT
+  std::vector<std::vector<double>> flux_down_temperature_jac;        ///< d(flux_down)/dT
+  std::vector<std::vector<double>> mean_intensity_temperature_jac;       ///< d(mean_intensity)/dT
+  std::vector<std::vector<double>> mean_intensity_down_temperature_jac;  ///< d(mean_intensity_down)/dT
+  std::vector<std::vector<double>> mean_intensity_up_temperature_jac;    ///< d(mean_intensity_up)/dT
+  std::vector<std::vector<double>> flux_divergence_temperature_jac;  ///< d(flux_tau_divergence)/dT (heating-rate Jacobian)
+
   /**
    * @brief Default constructor
    */

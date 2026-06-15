@@ -28,6 +28,7 @@ public:
   bool use_delta_m_plus = false;
   bool use_diffusion_lower_bc = false;
   bool index_from_bottom = false; ///< If true, user arrays are indexed from BOA (index 0) to TOA
+  bool compute_temperature_jacobian = false; ///< Compute analytic dF/dT Jacobians (thermal emission)
 
   // ======== Boundary conditions ========
   double direct_beam_flux = 0.0;

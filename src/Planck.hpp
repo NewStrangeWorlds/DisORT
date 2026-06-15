@@ -63,4 +63,29 @@ double planckFunction(double wnumlo, double wnumhi, double temp);
  */
 double planckFunction2(double wnumlo, double wnumhi, double temp);
 
+/**
+ * @brief Temperature derivative of the integrated Planck function
+ *
+ * Computes dB/dT where B is the band-integrated Planck function returned by
+ * planckFunction2(wnumlo, wnumhi, temp). Used for analytic temperature
+ * Jacobians of the radiation field.
+ *
+ * For a band [wnumlo, wnumhi] (wnumhi > wnumlo) the result uses the exact
+ * closed form
+ *   dB/dT = 4 B / T  -  (sigma/pi) * (15/pi^4) * T^3 * (v1 f(v1) - v0 f(v0)),
+ * where v_i = C2 * wnum_i / T and f(v) = v^3 / (e^v - 1). This is exact
+ * regardless of how B itself is evaluated internally.
+ *
+ * For the single-wavenumber case (wnumhi == wnumlo) the spectral derivative
+ *   dB/dT = b * (x / T) / (1 - e^{-x}),  x = C2 * wnum / T,
+ * is returned, with b the spectral Planck value.
+ *
+ * @param wnumlo Lower wavenumber [cm^-1]
+ * @param wnumhi Upper wavenumber [cm^-1]
+ * @param temp Temperature [K]
+ * @return dB/dT [W/m^2/K]
+ * @throws std::invalid_argument if temp < 0, wnumhi < wnumlo, or wnumlo < 0
+ */
+double planckFunctionDeriv2(double wnumlo, double wnumhi, double temp);
+
 } // namespace disortpp

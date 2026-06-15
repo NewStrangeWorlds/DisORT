@@ -54,6 +54,19 @@ inline void reverseInputArrays(DisortFluxConfig& config) {
 // Output array reversal (top-down -> bottom-up for user)
 // ============================================================================
 
+// Reverse a temperature-Jacobian array J[level][dof] of shape
+// [num_user_tau][num_layers+2]. The output-level (row) axis is reversed like the
+// flux arrays; the level-temperature columns (0..num_layers) are reversed too,
+// since index_from_bottom also flips the temperature input ordering, while the
+// surface column (the last one) is left in place. No-op if the Jacobian is empty.
+inline void reverseTemperatureJacobian(std::vector<std::vector<double>>& J) {
+  if (J.empty()) return;
+  std::reverse(J.begin(), J.end());                 // output-level (row) axis
+  for (auto& row : J)
+    if (row.size() >= 2)
+      std::reverse(row.begin(), row.end() - 1);      // level-T columns; keep surface (last) fixed
+}
+
 inline void reverseOutputArrays(DisortResult& result) {
   // 1D flux/intensity arrays (size num_user_tau)
   std::reverse(result.flux_direct_beam.begin(), result.flux_direct_beam.end());
@@ -73,6 +86,14 @@ inline void reverseOutputArrays(DisortResult& result) {
 
   // 3D intensity_fourier_expansion[lu][iu][k] — reverse outer (lu) dimension
   std::reverse(result.intensity_fourier_expansion.begin(), result.intensity_fourier_expansion.end());
+
+  // Temperature Jacobians (empty unless requested)
+  reverseTemperatureJacobian(result.flux_up_temperature_jac);
+  reverseTemperatureJacobian(result.flux_down_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_down_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_up_temperature_jac);
+  reverseTemperatureJacobian(result.flux_divergence_temperature_jac);
 }
 
 inline void reverseOutputArrays(FluxResult& result) {
@@ -84,6 +105,14 @@ inline void reverseOutputArrays(FluxResult& result) {
   std::reverse(result.mean_intensity_down.begin(), result.mean_intensity_down.end());
   std::reverse(result.mean_intensity_up.begin(), result.mean_intensity_up.end());
   std::reverse(result.mean_intensity_direct_beam.begin(), result.mean_intensity_direct_beam.end());
+
+  // Temperature Jacobians (empty unless requested)
+  reverseTemperatureJacobian(result.flux_up_temperature_jac);
+  reverseTemperatureJacobian(result.flux_down_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_down_temperature_jac);
+  reverseTemperatureJacobian(result.mean_intensity_up_temperature_jac);
+  reverseTemperatureJacobian(result.flux_divergence_temperature_jac);
 }
 
 } // namespace disortpp
